@@ -1,4 +1,4 @@
-# Ass_1_Program_2.py
+# Assignment1_2.py
 
 # Create funtion ChkNum() and this function should print check if number is EVEN or ODD, print accordingly
 
