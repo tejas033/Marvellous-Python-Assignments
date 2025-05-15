@@ -1,0 +1,110 @@
+C Python 3
+
+Complier > Interpreter > 
+
+.pyc > byte code temp. deletable file
+
+- static data type not available
+- dynamically type programming language
+
+Numeric type of data type
+	- integer
+	- float
+	- complex
+	
+Boolean
+
+Sequence data type
+	List 
+	Array is not in Python > list is alternative, num.py library to use Array in Python
+	Tuple
+	Set
+		> Frozen Set
+	Dictionary
+	
+	List VS Tuple >> list is mutable and Tuple is immutable, hetrogeneous 
+
+Mapping
+	
+String > 
+
+Identifier > special symbols are not allowed in the variable name
+
+Module is called as a python file :: using "import" keyword this file can be included this file 
+
+import Marvellous
+from Marvellous import display
+from Marvellous import *
+
+Type of Arguments:
+	positional argument
+	keyword argument
+	default argument
+	variable number of argument :: passing array to the container
+
+Selection:
+	if else
+	if lif lif else
+
+Loops:
+	for
+	range(7)
+	range(3,7)
+	range(2,15,3)
+	range(10,3,-1)
+	
+	++ , -- are not available i = i + 1
+	
+	while(condition):	
+
+>python Marvellous.py
+
+Input >
+	Before execution {comman line argument}
+	At the time of execution {when the program is running}
+	
+def main():
+    pass
+	
+Python supports Global variable and Local  variable
+
+for command line argument use "-h" for "help"
+
+** Sequence Data Types of Python:
+	- List			:: []
+	- Set			:: {}
+	- Tuple			:: ()
+	- Dictionary	:: {:}
+	
+Every data type in python is hetrogeneous >> 
+
+==========================================================================================
+
+Array (import numPy) VS List (python data type)
+
+** Nameless function > Lambda function  >  temporary function
+Regular Function (function with name) > reusable
+
+Interview:: Regular (def) Function VS Lambda Function
+	Convert regular function to lambda function, check the feasibility
+Nested Lambda function
+Python is inspired from multiple languages > ABC language supports Lambda
+	
+** Filter Map Reduce [FMR]		(filter, map, reduce are python methods)
+	- is a Design Pattern concept in Python
+	
+	400 > Filter > 60 > Map (Trained) > 60 > Reduce > 1 ... "final result of Reduced as one value" >> "fried rice analogy"
+
+Syntax: 
+	Data = [................]
+	FData = filter(filter_function_name, Data)		//filter_function_name should always return boolean
+	MData = map(map_function_name, FData)			//map_function_name takes one parameter returns updated one
+	RData = reduce(reduce_function_name, MData)		//reduce_function_name takes multiple inputs returns only one value
+
+** SKLearn is a open source library created by google 
+
+==========================================================================================
+
+
+
+** Exception Handling
