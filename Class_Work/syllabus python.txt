@@ -1,6 +1,10 @@
 C Python 3
 
-Complier > Interpreter > 
+Python is a object oriented programming language
+
+Python >> can be used as Scripting, Procedural, Functional, and OOP
+
+Complier > pyc > Interpreter > will convert to binary
 
 .pyc > byte code temp. deletable file
 
@@ -105,6 +109,63 @@ Syntax:
 
 ==========================================================================================
 
+** Program :: static set of instructions is called as program
+** Executable :: Binary instructions
 
+** Tool chain :: language converter, this converts the program in binary language
 
-** Exception Handling
+** Process :: is running instance of a program, microprocessor will run the binary program, this is converted to binary by tool chain
+we are all process having single (main) thread, each process have certain life span
+
+** Thread :: light weight entity of a process is called as thread, is part of process, it is dependent on process, if you need input/output engagement then you can use multi-Threading
+
+** Primary Storage (RAM) (temporary data) and Secondary Storage (Hard drive) (permanent data)
+
+** Operating System performs following tasks:
+- Process mgm :: life span
+- File mgm
+- Memory mgm
+- CPU Scheduling
+- Hardware Abstraction
+
+** Run time environment
+** Address space :: memory allocated on RAM for process to execute, unique PId (process identifier) & TId (thread identifier)
+Thread do not need separate space, it consumes same space as its process
+
+** Operating System loves to create multiple threads than multiple processes
+
+** Multi :: Processing ; Threading ; Core-Programming (con-currency model) ;
+
+** Thread life cycle: create >> runnable >> PVM will pick thread >> run >> waiting (option) >> Dead
+
+** Monolithic architecture & Micro services architecture
+
+** Dead lock :: 
+
+** Multi core programming can be called as advanced level of multi-processing
+
+==========================================================================================
+
+** Exception Handling :: Runtime error in the program which will terminate the execution. To avoid termination / abort best practice is to handle such exceptions
+try-except-(mutltiple except blocks, optional)-finally(optional) :: code in the try block is executed under the observation of PVM. 
+	try:
+	except:
+	finally:
+
+- Write only exception prone code in try block
+- Resource de-allocation in finally block
+
+===========================================================
+
+** Local Global variables in python
+* Static variable is not available in python
+
+===========================================================
+
+Function which calls itself is called as recursion function
+because static variables are not available is python, use Global variable
+
+# Recursion :: has limited stack frame, this stack is less than 1000
+# Iteration :: for ; while ; 
+
+# ** In python everything is object, function is also treated as object
