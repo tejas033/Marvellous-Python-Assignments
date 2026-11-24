@@ -1,0 +1,1564 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Python → ML → GenAI | Field Notes for .NET / Salesforce Developers</title>
+
+<!-- Math rendering (KaTeX) and syntax highlighting (highlight.js). Page stays readable offline; formulas show as raw TeX. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+
+<style>
+:root{
+  --bg:#0d1117; --bg2:#161b22; --bg3:#1f2630; --fg:#e6edf3; --muted:#8b949e; --border:#30363d;
+  --accent:#58a6ff; --accent2:#bc8cff; --ok:#3fb950; --warn:#d29922; --bad:#f85149; --cs:#a371f7;
+  --radius:12px; --shadow:0 6px 24px rgba(0,0,0,.25);
+}
+[data-theme="light"]{
+  --bg:#ffffff; --bg2:#f6f8fa; --bg3:#eef1f5; --fg:#1f2328; --muted:#59636e; --border:#d0d7de;
+  --accent:#0969da; --accent2:#8250df; --ok:#1a7f37; --warn:#9a6700; --bad:#cf222e; --cs:#8250df;
+  --shadow:0 6px 24px rgba(0,0,0,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;font-family:"Segoe UI",system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--fg);line-height:1.6;font-size:15.5px}
+a{color:var(--accent);text-decoration:none} a:hover{text-decoration:underline}
+#progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;z-index:100}
+
+/* Layout */
+.layout{display:grid;grid-template-columns:290px 1fr;min-height:100vh}
+nav.sidebar{position:sticky;top:0;height:100vh;overflow-y:auto;background:var(--bg2);border-right:1px solid var(--border);padding:18px 14px}
+.brand{font-weight:700;font-size:1.05rem;margin-bottom:10px}
+.brand small{display:block;color:var(--muted);font-weight:400;font-size:.8rem}
+#search{width:100%;padding:8px 10px;border-radius:8px;border:1px solid var(--border);background:var(--bg);color:var(--fg);margin:8px 0 12px}
+nav.sidebar ol{list-style:none;padding:0;margin:0;counter-reset:n}
+nav.sidebar li a{display:block;padding:5px 8px;border-radius:6px;color:var(--fg);font-size:.9rem}
+nav.sidebar li a:hover,nav.sidebar li a.active{background:var(--bg3);text-decoration:none;color:var(--accent)}
+nav.sidebar .grp{color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;margin:14px 8px 4px}
+.tools{display:flex;gap:6px;margin-bottom:6px}
+.btn{cursor:pointer;border:1px solid var(--border);background:var(--bg3);color:var(--fg);padding:6px 10px;border-radius:8px;font-size:.85rem}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+main{padding:28px 40px 80px;max-width:1080px}
+
+/* Hero */
+.hero{background:linear-gradient(135deg,rgba(88,166,255,.15),rgba(188,140,255,.15));border:1px solid var(--border);border-radius:18px;padding:28px 30px;margin-bottom:28px}
+.hero h1{margin:0 0 6px;font-size:1.9rem}
+.hero p{margin:4px 0;color:var(--muted)}
+.roadmap{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin-top:16px}
+.roadmap a{background:var(--bg2);border:1px solid var(--border);padding:6px 12px;border-radius:999px;font-size:.85rem;color:var(--fg)}
+.roadmap a:hover{border-color:var(--accent);text-decoration:none}
+.roadmap span{color:var(--muted)}
+
+/* Sections */
+section{margin:0 0 36px;scroll-margin-top:16px}
+section > h2{font-size:1.45rem;border-bottom:1px solid var(--border);padding-bottom:8px;margin:0 0 14px;display:flex;align-items:center;gap:10px;cursor:pointer}
+section > h2 .num{background:var(--accent);color:#fff;border-radius:8px;font-size:.8rem;padding:2px 8px}
+section > h2::after{content:"▾";margin-left:auto;color:var(--muted);font-size:1rem;transition:transform .2s}
+section.collapsed > h2::after{transform:rotate(-90deg)}
+section.collapsed > .body{display:none}
+h3{font-size:1.12rem;margin:22px 0 8px;color:var(--accent)}
+h4{margin:14px 0 6px}
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);padding:16px 18px;margin:12px 0}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:980px){.layout{grid-template-columns:1fr} nav.sidebar{position:relative;height:auto} .grid-2,.grid-3{grid-template-columns:1fr} main{padding:18px}}
+
+/* Callouts */
+.callout{border-left:4px solid var(--accent);background:var(--bg2);padding:10px 14px;border-radius:0 10px 10px 0;margin:12px 0}
+.callout b.t{display:block;margin-bottom:2px}
+.callout.note{border-color:var(--accent)} .callout.note b.t{color:var(--accent)}
+.callout.tip{border-color:var(--ok)} .callout.tip b.t{color:var(--ok)}
+.callout.warn{border-color:var(--warn)} .callout.warn b.t{color:var(--warn)}
+.callout.fix{border-color:var(--bad)} .callout.fix b.t{color:var(--bad)}
+.callout.cs{border-color:var(--cs)} .callout.cs b.t{color:var(--cs)}
+.callout.real{border-color:#f0883e} .callout.real b.t{color:#f0883e}
+
+/* Tables */
+table{border-collapse:collapse;width:100%;margin:10px 0;font-size:.92rem}
+th,td{border:1px solid var(--border);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--bg3)}
+tr:nth-child(even) td{background:rgba(127,127,127,.04)}
+code{font-family:"Cascadia Code",Consolas,monospace;font-size:.88em;background:var(--bg3);padding:1px 5px;border-radius:5px}
+pre{position:relative;margin:10px 0;border-radius:10px;border:1px solid var(--border);overflow:auto}
+pre code{display:block;padding:14px 16px;background:#0d1117 !important;font-size:.85rem;line-height:1.5}
+.copy{position:absolute;top:6px;right:6px;font-size:.72rem;padding:3px 8px;opacity:.75}
+.tag{display:inline-block;font-size:.72rem;padding:1px 8px;border-radius:999px;border:1px solid var(--border);color:var(--muted);margin-left:4px}
+
+/* Flow diagrams */
+.flow{display:flex;flex-wrap:wrap;align-items:stretch;gap:8px;margin:12px 0}
+.flow .step{flex:1 1 120px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;font-size:.86rem;position:relative}
+.flow .step b{display:block;color:var(--accent);font-size:.92rem}
+.flow .arrow{align-self:center;color:var(--muted);font-size:1.2rem}
+.nest{border:1px solid var(--border);border-radius:12px;padding:10px 12px 12px;margin-top:6px;background:rgba(88,166,255,.04)}
+.nest > .lbl{font-weight:600;font-size:.88rem}
+.nest > .lbl small{color:var(--muted);font-weight:400}
+
+/* Widgets */
+.widget{background:var(--bg2);border:1px dashed var(--accent);border-radius:var(--radius);padding:16px 18px;margin:16px 0}
+.widget h4{margin-top:0}
+.widget h4::before{content:"⚡ ";}
+.inrow{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.inrow label{font-size:.85rem;color:var(--muted)}
+.inrow input[type=number]{width:80px;padding:5px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--fg)}
+.cm{display:grid;grid-template-columns:110px 1fr 1fr;gap:4px;max-width:420px;margin:10px 0;font-size:.85rem}
+.cm div{padding:8px;border-radius:6px;text-align:center;background:var(--bg3)}
+.cm .tp,.cm .tn{background:rgba(63,185,80,.25)} .cm .fp,.cm .fn{background:rgba(248,81,73,.22)}
+.bar{height:16px;background:var(--bg3);border-radius:8px;overflow:hidden;flex:1}
+.bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .3s}
+.metric{display:flex;align-items:center;gap:10px;margin:5px 0;font-size:.88rem}
+.metric span:first-child{width:120px} .metric span:last-child{width:60px;text-align:right;font-variant-numeric:tabular-nums}
+canvas{max-width:100%;background:var(--bg);border:1px solid var(--border);border-radius:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px;min-height:34px;margin:6px 0}
+.chip{padding:4px 10px;border-radius:999px;background:var(--bg3);border:1px solid var(--border);font-family:Consolas,monospace;font-size:.85rem;transition:all .3s}
+.chip.out{opacity:.25;text-decoration:line-through}
+.chip.hot{background:var(--accent);color:#fff;border-color:var(--accent)}
+.split{display:flex;height:34px;border-radius:8px;overflow:hidden;font-size:.82rem;color:#fff;font-weight:600}
+.split div{display:flex;align-items:center;justify-content:center;transition:width .3s}
+
+/* Flashcards */
+details{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;margin:8px 0}
+details summary{cursor:pointer;font-weight:600}
+details[open] summary{color:var(--accent);margin-bottom:6px}
+.prompt-box{white-space:pre-wrap;font-family:Consolas,monospace;font-size:.85rem;background:var(--bg3);border-radius:10px;padding:16px;border:1px solid var(--border)}
+footer{color:var(--muted);font-size:.8rem;border-top:1px solid var(--border);padding-top:14px;margin-top:40px}
+.hidden{display:none !important}
+@media print{nav.sidebar,.tools,.copy,#progress{display:none} .layout{display:block} section.collapsed > .body{display:block}}
+</style>
+</head>
+<body>
+<div id="progress"></div>
+<div class="layout">
+
+<!-- ============================ SIDEBAR ============================ -->
+<nav class="sidebar" id="toc">
+  <div class="brand">🐍 Python → AI Field Notes<small>Rewritten for experienced .NET / Salesforce developers</small></div>
+  <div class="tools">
+    <button class="btn" id="themeBtn" title="Toggle theme">🌓 Theme</button>
+    <button class="btn" id="expandBtn">Expand all</button>
+    <button class="btn" id="collapseBtn">Collapse</button>
+  </div>
+  <input id="search" type="search" placeholder="🔎 Filter topics (e.g. lambda, KNN, RAG)">
+  <ol>
+    <li class="grp">Part A: Python</li>
+    <li><a href="#s1">1. How Python Runs</a></li>
+    <li><a href="#s2">2. Types &amp; Collections</a></li>
+    <li><a href="#s3">3. Functions, Modules, Control Flow</a></li>
+    <li><a href="#s4">4. Functional Python: Lambda &amp; FMR</a></li>
+    <li><a href="#s5">5. Recursion &amp; Exceptions</a></li>
+    <li><a href="#s6">6. OOP in Python</a></li>
+    <li><a href="#s7">7. Processes, Threads, Concurrency</a></li>
+    <li><a href="#s8">8. Data Structures</a></li>
+    <li><a href="#s9">9. Tooling &amp; Project Layout</a></li>
+    <li class="grp">Part B: Automation</li>
+    <li><a href="#s10">10. Automation Recipes</a></li>
+    <li class="grp">Part C: Machine Learning</li>
+    <li><a href="#s11">11. AI / ML Landscape</a></li>
+    <li><a href="#s12">12. ML Workflow &amp; Libraries</a></li>
+    <li><a href="#s13">13. Statistics You Actually Need</a></li>
+    <li><a href="#s14">14. Supervised: Classification</a></li>
+    <li><a href="#s15">15. Supervised: Regression</a></li>
+    <li><a href="#s16">16. Evaluating Models</a></li>
+    <li><a href="#s17">17. Tuning &amp; Ensembles</a></li>
+    <li><a href="#s18">18. Unsupervised: K-Means &amp; DBSCAN</a></li>
+    <li><a href="#s19">19. Shipping a Model</a></li>
+    <li class="grp">Part D: Deep Learning &amp; GenAI</li>
+    <li><a href="#s20">20. Neural Networks</a></li>
+    <li><a href="#s21">21. FNN, CNN, RNN, Transformers</a></li>
+    <li><a href="#s22">22. LLMs, RAG, MCP, Agents</a></li>
+    <li class="grp">Part E: Career</li>
+    <li><a href="#s23">23. Interview Flashcards</a></li>
+    <li><a href="#s24">24. Skills Roadmap &amp; Resources</a></li>
+    <li><a href="#s25">25. Project Ideas</a></li>
+    <li><a href="#s26">26. Corrections to Original Notes</a></li>
+    <li><a href="#s27">27. Refined Prompt</a></li>
+  </ol>
+</nav>
+
+<main>
+<!-- ============================ HERO ============================ -->
+<div class="hero">
+  <h1>Python → Machine Learning → GenAI</h1>
+  <p>Structured, corrected, and expanded notes from classroom training (Pune, 2025). Written for a senior C# / .NET / Salesforce engineer moving into AI roles.</p>
+  <p>💡 <b>Legend:</b> <span class="tag" style="border-color:var(--cs);color:var(--cs)">C# bridge</span> maps a concept to .NET or Apex. <span class="tag" style="border-color:var(--warn);color:var(--warn)">Important</span> covers interview and production gotchas. <span class="tag" style="border-color:var(--bad);color:var(--bad)">Fix</span> corrects a mistake in the original notes. ⚡ marks an interactive widget.</p>
+  <div class="roadmap">
+    <a href="#s1">Python</a><span>→</span><a href="#s10">Automation</a><span>→</span><a href="#s13">Stats</a><span>→</span><a href="#s11">Data Science</a><span>→</span><a href="#s14">ML</a><span>→</span><a href="#s20">Deep Learning</a><span>→</span><a href="#s21">Transformers</a><span>→</span><a href="#s22">LLM / GenAI / Agents</a>
+  </div>
+</div>
+
+<!-- ============================ 1 ============================ -->
+<section id="s1">
+<h2><span class="num">1</span> How Python Runs</h2>
+<div class="body">
+<div class="flow">
+  <div class="step"><b>app.py</b>Source code</div><div class="arrow">→</div>
+  <div class="step"><b>Compiler</b>Built into CPython</div><div class="arrow">→</div>
+  <div class="step"><b>.pyc bytecode</b>Cached in <code>__pycache__/</code>, safe to delete</div><div class="arrow">→</div>
+  <div class="step"><b>PVM</b>Python Virtual Machine interprets the bytecode</div><div class="arrow">→</div>
+  <div class="step"><b>CPU</b>Runs as native calls</div>
+</div>
+<div class="callout cs"><b class="t">C# bridge</b>The <code>.py → .pyc → PVM</code> flow mirrors <code>.cs → IL (.dll) → CLR</code>. The difference is that CPython <i>interprets</i> the bytecode, while the CLR JIT-compiles IL to machine code. That is the main reason pure Python loops run 10–100× slower than C#. In practice the heavy lifting is pushed into C libraries such as NumPy and PyTorch.</div>
+
+<div class="grid-2">
+<div class="card"><h4>Multi-paradigm language</h4>
+<ul>
+<li><b>Scripting</b>: top-to-bottom code, typical for automation</li>
+<li><b>Procedural</b>: <code>def</code> functions</li>
+<li><b>Functional</b>: <code>lambda</code>, <code>map</code>/<code>filter</code>/<code>reduce</code>, comprehensions</li>
+<li><b>Object-oriented</b>: <code>class</code>. Everything is an object, including functions, classes and modules.</li>
+</ul></div>
+<div class="card"><h4>Dynamically but strongly typed</h4>
+<p>Types belong to <i>values</i>, not variables, and are resolved at runtime. <code>"1" + 1</code> raises <code>TypeError</code>, so there is no implicit coercion as in JavaScript.</p>
+<p>Optional <b>type hints</b> (<code>def f(x: int) -&gt; str</code>) are checked by tools such as <code>mypy</code> and <code>pyright</code>, not at runtime. Use them in professional code; they work like C#'s compile-time checks.</p></div>
+</div>
+
+<pre><code class="language-python">x = 10          # int
+x = "ten"       # now str: allowed (dynamic)
+print(type(x))  # &lt;class 'str'&gt;
+
+def area(r: float) -&gt; float:   # type hints = documentation + static tooling
+    return 3.14159 * r ** 2</code></pre>
+
+<div class="callout warn"><b class="t">Important</b>Python has no <code>++</code> / <code>--</code>. Use <code>i += 1</code>. Python also has no <code>switch</code> before version 3.10; since then, use <code>match</code>/<code>case</code>, which supports structural pattern matching.</div>
+</div>
+</section>
+
+<!-- ============================ 2 ============================ -->
+<section id="s2">
+<h2><span class="num">2</span> Data Types &amp; Collections</h2>
+<div class="body">
+<table>
+<tr><th>Category</th><th>Python type</th><th>Literal</th><th>Mutable?</th><th>C# equivalent</th></tr>
+<tr><td>Numeric</td><td><code>int</code> (arbitrary precision), <code>float</code>, <code>complex</code></td><td><code>7</code>, <code>3.14</code>, <code>2+3j</code></td><td>No</td><td><code>BigInteger</code>, <code>double</code>, <code>Complex</code></td></tr>
+<tr><td>Boolean</td><td><code>bool</code></td><td><code>True</code>/<code>False</code></td><td>No</td><td><code>bool</code></td></tr>
+<tr><td>Text</td><td><code>str</code></td><td><code>'a'</code>, <code>"a"</code>, <code>f"{x}"</code></td><td>No</td><td><code>string</code> (immutable too)</td></tr>
+<tr><td>Sequence</td><td><code>list</code></td><td><code>[1, "a", 2.0]</code></td><td>Yes</td><td><code>List&lt;object&gt;</code></td></tr>
+<tr><td>Sequence</td><td><code>tuple</code></td><td><code>(1, "a")</code></td><td>No</td><td><code>ValueTuple</code> / record</td></tr>
+<tr><td>Set</td><td><code>set</code> / <code>frozenset</code></td><td><code>{1, 2}</code></td><td>Yes / No</td><td><code>HashSet&lt;T&gt;</code> / <code>ImmutableHashSet</code></td></tr>
+<tr><td>Mapping</td><td><code>dict</code> (keeps insertion order)</td><td><code>{"k": 1}</code></td><td>Yes</td><td><code>Dictionary&lt;K,V&gt;</code> / Apex <code>Map</code></td></tr>
+<tr><td>Array</td><td><code>numpy.ndarray</code></td><td><code>np.array([1,2])</code></td><td>Yes</td><td><code>double[]</code> (homogeneous, fast)</td></tr>
+</table>
+
+<pre><code class="language-python">nums   = [3, 1, 2]; nums.append(4); nums[0] = 9      # list: ordered, mutable
+point  = (10, 20); x, y = point                      # tuple: immutable, unpacking
+tags   = {"ml", "ai", "ml"}                          # set: {'ml','ai'} (dedupes)
+person = {"name": "Asha", "skills": ["C#", "Apex"]}  # dict
+person.get("age", 0)                                 # safe lookup, like TryGetValue
+
+# Comprehensions: the Pythonic LINQ
+squares = [n * n for n in range(10) if n % 2 == 0]   # [0, 4, 16, 36, 64]
+lookup  = {p: len(p) for p in ["sf", "dotnet"]}      # {'sf': 2, 'dotnet': 6}</code></pre>
+
+<div class="callout note"><b class="t">Key points</b>
+<ul style="margin:4px 0">
+<li><b>List vs tuple</b>: lists are mutable, tuples are immutable. Tuples can be dictionary keys and signal "fixed record". Both can hold mixed types.</li>
+<li><b>List vs NumPy array</b>: a list stores pointers to objects of any type. An ndarray stores a contiguous block of one type, so it is 10–100× faster for maths and is what every ML library expects.</li>
+<li><b>Identifiers</b>: letters, digits and <code>_</code> only, cannot start with a digit, case-sensitive. Use <code>snake_case</code> for functions and variables, <code>PascalCase</code> for classes (PEP 8).</li>
+</ul></div>
+</div>
+</section>
+
+<!-- ============================ 3 ============================ -->
+<section id="s3">
+<h2><span class="num">3</span> Functions, Modules &amp; Control Flow</h2>
+<div class="body">
+<h3>Function argument types</h3>
+<pre><code class="language-python">def register(name, role="dev", *skills, **meta):
+    print(name, role, skills, meta)
+
+register("Asha")                                  # positional + default
+register(role="architect", name="Ravi")           # keyword arguments (any order)
+register("Neha", "lead", "C#", "Python", city="Pune")
+# -&gt; Neha lead ('C#', 'Python') {'city': 'Pune'}
+
+def stats(values):
+    return min(values), max(values)               # multiple return values = tuple
+lo, hi = stats([4, 9, 1])</code></pre>
+<table>
+<tr><th>Kind</th><th>Syntax</th><th>C# analogue</th></tr>
+<tr><td>Positional</td><td><code>f(1, 2)</code></td><td>Normal parameters</td></tr>
+<tr><td>Keyword</td><td><code>f(b=2, a=1)</code></td><td>Named arguments</td></tr>
+<tr><td>Default</td><td><code>def f(a, b=0)</code></td><td>Optional parameters</td></tr>
+<tr><td>Variable positional</td><td><code>*args</code> → tuple</td><td><code>params object[]</code></td></tr>
+<tr><td>Variable keyword</td><td><code>**kwargs</code> → dict</td><td>No direct equivalent (closest is an options object)</td></tr>
+</table>
+<div class="callout warn"><b class="t">Important: mutable default trap</b><code>def f(items=[])</code> shares <b>one</b> list across every call. Use <code>items=None</code> and then <code>items = items or []</code>.</div>
+
+<h3>Modules &amp; imports</h3>
+<p>A <b>module</b> is any <code>.py</code> file. A <b>package</b> is a folder of modules, and it can contain an <code>__init__.py</code>.</p>
+<pre><code class="language-python">import helpers                  # use as helpers.display()
+from helpers import display     # import one name
+import numpy as np              # alias (standard convention)
+from helpers import *           # avoid: pollutes the namespace</code></pre>
+
+<h3>Selection &amp; loops</h3>
+<pre><code class="language-python">score = 72
+if score &gt;= 90:   grade = "A"
+elif score &gt;= 70: grade = "B"
+else:             grade = "C"
+
+label = "pass" if score &gt;= 40 else "fail"      # ternary
+
+for i in range(7):          ...   # 0..6
+for i in range(3, 7):       ...   # 3..6
+for i in range(2, 15, 3):   ...   # 2,5,8,11,14
+for i in range(10, 3, -1):  ...   # 10..4
+for idx, val in enumerate(["a", "b"]): ...     # index + value
+for k, v in person.items(): ...                # dict iteration
+
+while score &lt; 100:
+    score += 10
+
+match command.split():                         # Python 3.10+
+    case ["start", app]: launch(app)
+    case ["stop"]:       stop()
+    case _:              print("unknown")</code></pre>
+
+<h3>Input: command line vs runtime</h3>
+<pre><code class="language-python">import argparse
+
+def main():
+    parser = argparse.ArgumentParser(description="Duplicate file finder")
+    parser.add_argument("folder")
+    parser.add_argument("--email", help="receiver for the log report")
+    args = parser.parse_args()                 # free -h / --help support
+    name = input("Your name: ")                # runtime input (always str)
+
+if __name__ == "__main__":                     # runs only when executed directly, not on import
+    main()</code></pre>
+<div class="callout cs"><b class="t">C# bridge</b><code>if __name__ == "__main__": main()</code> is Python's <code>static void Main(string[] args)</code>. <code>sys.argv</code> is <code>args</code>, and <code>argparse</code> is like <code>System.CommandLine</code>.</div>
+
+<h3>Scope: local, global, and "static"</h3>
+<pre><code class="language-python">counter = 0                 # module-level (global)
+
+def hit():
+    global counter          # needed to REASSIGN a global inside a function
+    counter += 1
+
+class Api:
+    calls = 0               # class variable = shared, like C# static
+    def call(self):
+        Api.calls += 1</code></pre>
+<div class="callout note"><b class="t">Key point</b>Python has no <code>static</code> keyword for variables. Use <b>class variables</b> for shared state, or <code>@staticmethod</code> / <code>@classmethod</code> for methods. Scope lookup follows <b>LEGB</b>: Local → Enclosing → Global → Built-in.</div>
+</div>
+</section>
+
+<!-- ============================ 4 ============================ -->
+<section id="s4">
+<h2><span class="num">4</span> Functional Python: Lambda &amp; Filter-Map-Reduce</h2>
+<div class="body">
+<div class="grid-2">
+<div class="card"><h4>Regular function (<code>def</code>)</h4><ul><li>Named and reusable</li><li>Multiple statements, docstrings, type hints</li><li>Easy to test and debug (shows its name in stack traces)</li></ul></div>
+<div class="card"><h4>Lambda (anonymous)</h4><ul><li>A single <i>expression</i> only, with an implicit return</li><li>Throw-away, inline use: <code>key=</code>, <code>map</code>, <code>sorted</code></li><li>PEP 8 says don't assign a lambda to a name; use <code>def</code> instead</li></ul></div>
+</div>
+<pre><code class="language-python">def square(x): return x * x
+square_l = lambda x: x * x                    # same behaviour
+add      = lambda a, b: a + b
+adder    = lambda a: lambda b: a + b          # nested lambda (closure / currying)
+adder(5)(3)                                   # 8
+
+employees.sort(key=lambda e: (e["dept"], -e["salary"]))   # idiomatic use</code></pre>
+<div class="callout tip"><b class="t">Interview: can every <code>def</code> become a lambda?</b>No. Only functions whose body is a single expression can. You cannot convert functions that contain statements (<code>for</code>, <code>try</code>, assignments other than <code>:=</code>), multiple returns, or docstrings.</div>
+
+<h3>Filter → Map → Reduce</h3>
+<p>FMR is a <b>data-processing pattern</b> (the same idea behind Hadoop MapReduce and Spark): narrow the data, transform each item, then aggregate to one result.</p>
+<div class="callout real"><b class="t">Real-life analogy: fried rice</b>Start with 400 grains of rice. <b>Filter</b> out broken grains, leaving 60. <b>Map</b> cooks each remaining grain, so you still have 60 cooked grains. <b>Reduce</b> combines them into one plate of fried rice.</div>
+
+<div class="widget"><h4>FMR live demo: keep evens, square them, sum</h4>
+<div class="chips" id="fmrChips"></div>
+<div class="inrow"><button class="btn primary" id="fmrStep">Next step ▶</button><button class="btn" id="fmrReset">Reset</button><span id="fmrMsg" style="color:var(--muted);font-size:.88rem"></span></div>
+</div>
+
+<pre><code class="language-python">from functools import reduce
+
+data   = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+evens  = filter(lambda n: n % 2 == 0, data)        # predicate must return bool
+square = map(lambda n: n * n, evens)               # 1-in, 1-out transformer
+total  = reduce(lambda acc, n: acc + n, square)    # many-in, 1-out -&gt; 220
+
+# Pythonic equivalent (preferred in reviews):
+total = sum(n * n for n in data if n % 2 == 0)</code></pre>
+<div class="callout cs"><b class="t">C# bridge</b><code>filter</code> → <code>.Where()</code>, <code>map</code> → <code>.Select()</code>, <code>reduce</code> → <code>.Aggregate()</code>. Like LINQ, <code>filter</code> and <code>map</code> are <b>lazy</b> iterators: nothing runs until you consume them, and they can be consumed only once.</div>
+</div>
+</section>
+
+<!-- ============================ 5 ============================ -->
+<section id="s5">
+<h2><span class="num">5</span> Recursion &amp; Exception Handling</h2>
+<div class="body">
+<h3>Recursion vs iteration</h3>
+<pre><code class="language-python">def factorial(n: int) -&gt; int:
+    return 1 if n &lt;= 1 else n * factorial(n - 1)   # base case + recursive case
+
+import sys
+sys.getrecursionlimit()       # 1000 by default; Python has NO tail-call optimisation
+
+from functools import lru_cache
+@lru_cache                     # memoisation: turns exponential fib into linear time
+def fib(n): return n if n &lt; 2 else fib(n-1) + fib(n-2)</code></pre>
+<div class="callout note"><b class="t">Key points</b>Each call adds a stack frame, so deep recursion leads to <code>RecursionError</code>. Prefer loops for linear work. Recursion is the natural fit for trees, divide-and-conquer and <b>backtracking</b> (N-Queens, sudoku), though any recursion can be rewritten with an explicit stack. Use function parameters or a closure to carry state instead of globals.</div>
+
+<h3>Exceptions</h3>
+<pre><code class="language-python">import logging
+log = logging.getLogger(__name__)
+
+def read_amount(path: str) -&gt; float:
+    try:
+        with open(path) as f:                 # context manager auto-closes (like C# using)
+            return float(f.read())
+    except FileNotFoundError:
+        log.error("Missing file %s", path); raise
+    except ValueError as ex:
+        log.warning("Bad number: %s", ex);  return 0.0
+    else:
+        log.info("Parsed OK")                 # runs only if no exception
+    finally:
+        log.debug("Done")                     # always runs: cleanup
+
+class PaymentError(Exception):                # custom exception
+    pass</code></pre>
+<div class="callout tip"><b class="t">Best practices</b>Keep the <code>try</code> block small and limited to the code that can fail. Catch <i>specific</i> exceptions, never a bare <code>except:</code>. Release resources with <code>with</code>, or in <code>finally</code>. Use <code>raise ... from ex</code> to keep the cause chain, like the C# <code>InnerException</code>.</div>
+</div>
+</section>
+
+<!-- ============================ 6 ============================ -->
+<section id="s6">
+<h2><span class="num">6</span> Object-Oriented Python</h2>
+<div class="body">
+<p><b>OOP is a thought process:</b> (1) What must the system <i>do</i>? That gives you the behaviour, implemented as methods. (2) What data does it need to do it? That gives you the characteristics, implemented as attributes.</p>
+<div class="grid-2">
+<div class="card"><b>Encapsulation</b>: bundle data and methods. Python uses <i>convention</i>: <code>_internal</code> marks a member as internal, <code>__mangled</code> triggers name mangling, and <code>@property</code> replaces getters and setters.</div>
+<div class="card"><b>Abstraction</b>: expose <i>what</i>, hide <i>how</i>. Use <code>abc.ABC</code> with <code>@abstractmethod</code>, which works like a C# abstract class or interface.</div>
+<div class="card"><b>Inheritance</b>: reuse and extend. Python supports <b>multiple inheritance</b> and resolves method lookups through the MRO (C3 linearisation).</div>
+<div class="card"><b>Polymorphism</b>: one interface, many forms. Python relies on <b>duck typing</b>: "if it has <code>.speak()</code>, it can speak". Dunder methods provide operator overloading.</div>
+</div>
+<pre><code class="language-python">from abc import ABC, abstractmethod
+
+class Account(ABC):
+    bank = "Marvel Bank"                      # class variable (shared)
+
+    def __init__(self, owner: str, balance: float = 0):
+        self.owner = owner                    # instance variable
+        self._balance = balance               # "protected" by convention
+
+    @property
+    def balance(self): return self._balance   # read-only property
+
+    def deposit(self, amt):
+        if amt &lt;= 0: raise ValueError("Amount must be positive")
+        self._balance += amt
+
+    @abstractmethod
+    def interest(self) -&gt; float: ...
+
+    def __str__(self): return f"{self.owner}: {self._balance:.2f}"
+
+class Savings(Account):
+    def interest(self): return self._balance * 0.04
+
+class Current(Account):
+    def interest(self): return 0.0
+
+for acc in [Savings("Asha", 1000), Current("Ravi", 500)]:   # polymorphism
+    print(acc, acc.interest())</code></pre>
+
+<table>
+<tr><th>Inheritance type</th><th>Shape</th><th>Example</th></tr>
+<tr><td>Single</td><td>A → B</td><td><code>Savings(Account)</code></td></tr>
+<tr><td>Multilevel</td><td>A → B → C</td><td>Account → Savings → MinorSavings</td></tr>
+<tr><td>Hierarchical</td><td>One parent, many children</td><td>Account → Savings, Current</td></tr>
+<tr><td>Multiple</td><td>Many parents, one child</td><td><code>class Duck(Flyer, Swimmer)</code>. Not allowed for classes in C#, which only allows multiple interfaces.</td></tr>
+</table>
+<div class="callout note"><b class="t">Memory</b>Python manages memory automatically: <b>reference counting</b> frees most objects immediately, and a cyclic <b>garbage collector</b> handles reference cycles. Compare with the .NET generational GC.</div>
+</div>
+</section>
+
+<!-- ============================ 7 ============================ -->
+<section id="s7">
+<h2><span class="num">7</span> Processes, Threads &amp; Concurrency</h2>
+<div class="body">
+<table>
+<tr><th>Term</th><th>Meaning</th></tr>
+<tr><td>Program</td><td>A static set of instructions stored on disk</td></tr>
+<tr><td>Executable</td><td>Binary instructions produced by the <b>toolchain</b> (compiler, linker)</td></tr>
+<tr><td>Process</td><td>A running instance of a program. It has its own address space and PID, and runs at least one (main) thread.</td></tr>
+<tr><td>Thread</td><td>A lightweight unit of execution inside a process. It has its own TID and stack but <b>shares</b> the process memory.</td></tr>
+<tr><td>Daemon process</td><td>Runs in the background (services)</td></tr>
+<tr><td>Zombie process</td><td>Has finished, but its exit status hasn't been collected by its parent yet (Unix)</td></tr>
+<tr><td>Deadlock</td><td>Two or more threads each hold a lock the other needs, so all wait forever. The four Coffman conditions are mutual exclusion, hold-and-wait, no preemption, and circular wait.</td></tr>
+</table>
+<div class="flow">
+  <div class="step"><b>New</b>Thread created</div><div class="arrow">→</div>
+  <div class="step"><b>Runnable</b>Waiting for the scheduler</div><div class="arrow">→</div>
+  <div class="step"><b>Running</b>On a CPU</div><div class="arrow">⇄</div>
+  <div class="step"><b>Waiting / Blocked</b>I/O, lock, or sleep</div><div class="arrow">→</div>
+  <div class="step"><b>Terminated</b>Dead</div>
+</div>
+<p>The <b>OS</b> handles process management, memory management (RAM is primary/volatile storage; disk is secondary/persistent; virtual memory maps the address space onto both), file management, CPU scheduling and hardware abstraction.</p>
+
+<h3>Choosing a concurrency model</h3>
+<table>
+<tr><th>Workload</th><th>Python tool</th><th>Why</th><th>C# analogue</th></tr>
+<tr><td>I/O-bound (APIs, files, DB)</td><td><code>asyncio</code> or <code>ThreadPoolExecutor</code></td><td>Waiting releases the GIL</td><td><code>async/await</code>, <code>Task</code></td></tr>
+<tr><td>CPU-bound (number crunching)</td><td><code>multiprocessing</code> / <code>ProcessPoolExecutor</code></td><td>Each process has its own GIL, so all cores are used</td><td><code>Parallel.For</code></td></tr>
+<tr><td>Heavy numerical maths</td><td>NumPy / PyTorch</td><td>The C code releases the GIL internally</td><td>SIMD / native libraries</td></tr>
+</table>
+<div class="callout warn"><b class="t">Important: the GIL</b>CPython's <b>Global Interpreter Lock</b> lets only one thread execute Python bytecode at a time, so threads do <i>not</i> speed up CPU-bound Python code. Python 3.13+ ships an optional free-threaded ("no-GIL") build, but the default build still has the GIL.</div>
+<pre><code class="language-python">from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+import requests
+
+urls = ["https://example.com"] * 10
+with ThreadPoolExecutor(max_workers=8) as pool:            # I/O-bound
+    pages = list(pool.map(lambda u: requests.get(u).status_code, urls))
+
+def heavy(n): return sum(i * i for i in range(n))
+if __name__ == "__main__":                                 # required on Windows
+    with ProcessPoolExecutor() as pool:                    # CPU-bound
+        print(list(pool.map(heavy, [10**7] * 4)))</code></pre>
+<div class="callout note"><b class="t">Architecture link</b>A <b>monolith</b> is one deployable unit; <b>microservices</b> are independently deployable services that talk over HTTP or message queues. ML models are usually deployed as a microservice, for example a FastAPI container behind an API gateway.</div>
+</div>
+</section>
+
+<!-- ============================ 8 ============================ -->
+<section id="s8">
+<h2><span class="num">8</span> Data Structures</h2>
+<div class="body">
+<div class="grid-2">
+<div class="card"><h4>Linear</h4>Array, Stack (LIFO), Queue (FIFO), Linked lists (singly, doubly, circular)</div>
+<div class="card"><h4>Non-linear</h4>Trees (BST, heap, trie), Graphs, Hash maps (<code>dict</code>)</div>
+</div>
+<pre><code class="language-python">from collections import deque
+stack = []; stack.append(1); stack.pop()            # list as a stack
+queue = deque(); queue.append(1); queue.popleft()   # O(1) queue (a list.pop(0) is O(n))
+
+class Node:
+    def __init__(self, data): self.data, self.next = data, None
+
+class SinglyLinkedList:
+    def __init__(self): self.head, self.count = None, 0
+
+    def insert_first(self, data):
+        node = Node(data); node.next = self.head; self.head = node; self.count += 1
+
+    def insert_last(self, data):
+        node = Node(data)
+        if not self.head: self.head = node
+        else:
+            cur = self.head
+            while cur.next: cur = cur.next
+            cur.next = node
+        self.count += 1
+
+    def delete_first(self):
+        if self.head: self.head = self.head.next; self.count -= 1
+
+    def display(self):
+        cur, out = self.head, []
+        while cur: out.append(str(cur.data)); cur = cur.next
+        print(" -&gt; ".join(out) + " -&gt; None")</code></pre>
+<table>
+<tr><th>Variant</th><th>Links</th><th>Typical use</th></tr>
+<tr><td>Singly linear</td><td>next</td><td>Simple stacks, adjacency lists</td></tr>
+<tr><td>Doubly linear</td><td>prev + next</td><td>Browser history, LRU caches</td></tr>
+<tr><td>Singly circular</td><td>Last node points to the head</td><td>Round-robin scheduling</td></tr>
+<tr><td>Doubly circular</td><td>Both directions, wraps around</td><td>Media playlists</td></tr>
+</table>
+<p>Standard operations are insert and delete (at the start, the end, or a position), plus traversal (display, count).</p>
+</div>
+</section>
+
+<!-- ============================ 9 ============================ -->
+<section id="s9">
+<h2><span class="num">9</span> Tooling, Packages &amp; Project Layout</h2>
+<div class="body">
+<pre><code class="language-bash">python -m venv .venv                 # isolated env per project (always do this)
+.venv\Scripts\activate               # Windows  (source .venv/bin/activate on Linux/Mac)
+pip install pandas scikit-learn      # install
+pip install --upgrade pandas         # upgrade
+pip uninstall pandas                 # remove
+pip list / pip show pandas           # inspect
+pip freeze &gt; requirements.txt        # lock dependencies
+pip install -r requirements.txt      # reproduce the environment</code></pre>
+<div class="callout cs"><b class="t">C# bridge</b><code>pip</code> plays the role of NuGet, <code>requirements.txt</code> or <code>pyproject.toml</code> plays the role of <code>.csproj</code> package references, and a <code>venv</code> is a per-project package folder. Modern alternatives are <code>uv</code> (very fast), <code>poetry</code>, and <code>conda</code> (Anaconda bundles most data-science libraries).</div>
+
+<h3>Web frameworks</h3>
+<table>
+<tr><th>Framework</th><th>Style</th><th>Use when</th></tr>
+<tr><td>Django</td><td>Batteries included: ORM, admin, authentication</td><td>Full web apps (similar to ASP.NET MVC)</td></tr>
+<tr><td>Flask</td><td>Micro-framework</td><td>Small services and prototypes</td></tr>
+<tr><td><b>FastAPI</b></td><td>Async, type-hint driven, automatic OpenAPI docs</td><td><b>Serving ML models</b> and AI APIs. It is the industry default and feels like ASP.NET Minimal APIs.</td></tr>
+</table>
+<pre><code class="language-bash">pip install django &amp;&amp; django-admin startproject my_project</code></pre>
+
+<h3>Standard script template</h3>
+<pre><code class="language-python">"""
+Module : duplicate_finder.py
+Purpose: Find duplicate files by checksum and email a report.
+Usage  : python duplicate_finder.py &lt;folder&gt; --email someone@company.com
+"""
+import logging
+
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
+
+def find_duplicates(folder: str) -&gt; dict[str, list[str]]:
+    """Return {checksum: [paths...]} for files that share content."""
+    ...
+
+def main() -&gt; None:
+    ...
+
+if __name__ == "__main__":
+    main()</code></pre>
+<div class="callout tip"><b class="t">Professional habits</b>Write small single-purpose functions with docstrings and type hints. Use <code>logging</code> instead of <code>print</code>. Format with <code>ruff</code> or <code>black</code>, test with <code>pytest</code>, and keep secrets in environment variables or a <code>.env</code> file that is excluded from git.</div>
+</div>
+</section>
+
+<!-- ============================ 10 ============================ -->
+<section id="s10">
+<h2><span class="num">10</span> Automation Recipes</h2>
+<div class="body">
+<p>Python's main enterprise use outside AI is "glue" automation: files, processes, email, scheduled jobs and API integrations. The recipes below cover the course assignments.</p>
+
+<h3>10.1 Organise files by extension and rename sequentially</h3>
+<pre><code class="language-python">from pathlib import Path
+import shutil
+
+def organise(folder: str) -&gt; None:
+    root = Path(folder)
+    for f in root.iterdir():
+        if f.is_file() and f.suffix:
+            target = root / f.suffix[1:].upper()          # test.cpp -&gt; CPP/
+            target.mkdir(exist_ok=True)                    # created at runtime
+            shutil.move(str(f), target / f.name)
+
+def rename_numeric(folder: str) -&gt; None:
+    files = sorted(p for p in Path(folder).iterdir() if p.is_file())
+    for i, f in enumerate(files, start=1):
+        f.rename(f.with_name(f"{i:03d}{f.suffix}"))       # 001.jpg, 002.pdf ...</code></pre>
+
+<h3>10.2 Checksums and a duplicate-file finder</h3>
+<p>A <b>checksum</b> is a fixed-length hexadecimal digest of a file's <i>content</i>; metadata such as name and dates is not included. MD5 produces 32 hex characters, SHA-1 produces 40 and SHA-256 produces 64. Two files with the same digest almost certainly have the same content.</p>
+<pre><code class="language-python">import hashlib
+from collections import defaultdict
+from pathlib import Path
+
+def checksum(path: Path, algo: str = "sha256", chunk: int = 1 &lt;&lt; 20) -&gt; str:
+    h = hashlib.new(algo)
+    with path.open("rb") as f:
+        while block := f.read(chunk):          # stream: works for multi-GB files
+            h.update(block)
+    return h.hexdigest()
+
+def find_duplicates(folder: str) -&gt; dict[str, list[Path]]:
+    groups = defaultdict(list)
+    for p in Path(folder).rglob("*"):
+        if p.is_file():
+            groups[checksum(p)].append(p)
+    return {k: v for k, v in groups.items() if len(v) &gt; 1}</code></pre>
+<div class="callout warn"><b class="t">Important</b>MD5 and SHA-1 are fine for de-duplication but are <b>cryptographically broken</b>. Use SHA-256 for integrity and security checks.</div>
+
+<h3>10.3 Log to a folder and email the log</h3>
+<pre><code class="language-python">import logging, os, smtplib, sys
+from datetime import datetime
+from email.message import EmailMessage
+from pathlib import Path
+
+LOG_DIR = Path("logs"); LOG_DIR.mkdir(exist_ok=True)
+log_file = LOG_DIR / f"run_{datetime.now():%Y%m%d_%H%M%S}.log"
+logging.basicConfig(filename=log_file, level=logging.INFO)
+
+def send_report(receiver: str, attachment: Path) -&gt; None:
+    msg = EmailMessage()
+    msg["Subject"], msg["From"], msg["To"] = "Automation report", os.environ["SMTP_USER"], receiver
+    msg.set_content("Please find the log attached.")
+    msg.add_attachment(attachment.read_bytes(), maintype="text", subtype="plain",
+                       filename=attachment.name)
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465) as s:
+        s.login(os.environ["SMTP_USER"], os.environ["SMTP_APP_PASSWORD"])   # never hard-code
+        s.send_message(msg)
+
+if __name__ == "__main__":
+    send_report(sys.argv[1], log_file)          # receiver taken from the command line</code></pre>
+<div class="callout warn"><b class="t">Security</b>Use an app password or OAuth (for example the Gmail or Google People API), never your real password. Load it from environment variables, Azure Key Vault or AWS Secrets Manager.</div>
+
+<h3>10.4 Process automation with <code>psutil</code></h3>
+<pre><code class="language-python">import psutil, subprocess, time
+
+def kill_cpu_hogs(threshold: float = 30.0, dry_run: bool = True) -&gt; None:
+    procs = list(psutil.process_iter(["pid", "name"]))
+    for p in procs:                       # first call primes the counters (always returns 0)
+        try: p.cpu_percent(None)
+        except (psutil.NoSuchProcess, psutil.AccessDenied): pass
+    time.sleep(1)
+    cores = psutil.cpu_count()
+    for p in procs:
+        try:
+            usage = p.cpu_percent(None) / cores
+            if usage &gt; threshold:
+                print(f"{p.info['name']} (PID {p.pid}) at {usage:.1f}%")
+                if not dry_run: p.terminate()
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            continue
+
+def restart_calculator() -&gt; None:
+    running = [p for p in psutil.process_iter(["name"]) if p.info["name"] == "CalculatorApp.exe"]
+    for p in running: p.kill()
+    if running: time.sleep(5)
+    subprocess.Popen("calc.exe")</code></pre>
+<div class="callout warn"><b class="t">Caution</b>Always test with a dry run and an allow-list. Killing system processes can crash the OS.</div>
+
+<h3>10.5 Shell redirection for testable automation</h3>
+<table>
+<tr><th>Operator</th><th>Stream</th><th>Example</th></tr>
+<tr><td><code>&gt;</code></td><td>stdout (file descriptor 1), overwrite</td><td><code>tasklist &gt; output.txt</code></td></tr>
+<tr><td><code>&gt;&gt;</code></td><td>stdout, append</td><td><code>py job.py &gt;&gt; history.log</code></td></tr>
+<tr><td><code>&lt;</code></td><td>stdin (file descriptor 0)</td><td><code>py add.py &lt; input.txt</code></td></tr>
+<tr><td><code>2&gt;</code></td><td>stderr (file descriptor 2)</td><td><code>py add.py &lt; in.txt &gt; out.txt 2&gt; err.txt</code></td></tr>
+</table>
+
+<h3>10.6 Salesforce data export (simple-salesforce)</h3>
+<pre><code class="language-python">import os
+from pathlib import Path
+from simple_salesforce import Salesforce          # pip install simple-salesforce
+
+sf = Salesforce(username=os.environ["SF_USER"], password=os.environ["SF_PASS"],
+                security_token=os.environ["SF_TOKEN"])
+
+files = sf.query_all("SELECT Id, Title, FileExtension, VersionData "
+                     "FROM ContentVersion WHERE IsLatest = true")["records"]
+out = Path("export"); out.mkdir(exist_ok=True)
+for f in files:
+    url = f"https://{sf.sf_instance}{f['VersionData']}"
+    data = sf.session.get(url, headers={"Authorization": f"Bearer {sf.session_id}"}).content
+    (out / f"{f['Title']}.{f['FileExtension']}").write_bytes(data)
+    # alternatively, insert into PostgreSQL (psycopg) as BYTEA together with record metadata</code></pre>
+<p>References: <a href="https://developer.salesforce.com/blogs/2021/09/how-to-automate-data-extraction-from-salesforce-using-python" target="_blank">Salesforce blog: automate data extraction with Python</a>. For production, use a Connected App with the OAuth JWT flow instead of username, password and token. For large volumes, use the Bulk API 2.0.</p>
+<div class="callout tip"><b class="t">Scheduling</b>Run scripts on a schedule with Windows Task Scheduler, cron, the <code>schedule</code> library, or as a container job in CI/CD. Further reading: <i>Automate the Boring Stuff with Python</i> (Al Sweigart).</div>
+</div>
+</section>
+
+<!-- ============================ 11 ============================ -->
+<section id="s11">
+<h2><span class="num">11</span> The AI / ML Landscape</h2>
+<div class="body">
+<div class="nest"><div class="lbl">Computer Science + Mathematics <small>(coding + problem solving)</small></div>
+ <div class="nest"><div class="lbl">Data Science <small>(turning data into insight: statistics, analysis, visualisation)</small></div>
+  <div class="nest"><div class="lbl">Artificial Intelligence <small>(machines performing tasks that need human-like intelligence)</small></div>
+   <div class="nest"><div class="lbl">Machine Learning <small>(learning patterns from data instead of hand-coded rules)</small></div>
+    <div class="nest"><div class="lbl">Deep Learning <small>(multi-layer neural networks; learns features automatically)</small></div>
+     <div class="nest"><div class="lbl">Generative AI → LLMs <small>(models that create new text, code, images and audio)</small></div></div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+<div class="callout real"><b class="t">Data → decision ladder</b>Raw <b>data</b> becomes <b>information</b>, which is framed by a <b>problem statement</b>. Analysis of the relevant data feeds a <b>model</b>, which produces <b>predictions</b> and then <b>business decisions</b>. "Humans learn from experience; machines learn from data."</div>
+
+<h3>Types of learning</h3>
+<table>
+<tr><th>Type</th><th>Data</th><th>Goal</th><th>Real-life example</th></tr>
+<tr><td><b>Supervised</b></td><td>Features <b>and</b> labels</td><td>Classification (discrete) or regression (continuous)</td><td>Spam vs not spam; house price prediction</td></tr>
+<tr><td><b>Unsupervised</b></td><td>Features only</td><td>Find structure: clusters, anomalies</td><td>Customer segments such as "high-value frequent shoppers" vs "budget occasional buyers"</td></tr>
+<tr><td><b>Semi-supervised</b></td><td>A few labels, lots of unlabelled data</td><td>Exploit cheap unlabelled data</td><td>Labelling 1% of support tickets and propagating the labels</td></tr>
+<tr><td><b>Reinforcement</b></td><td>An agent plus an environment with rewards</td><td>Learn a policy that maximises reward</td><td>AWS DeepRacer, game-playing AI, robotics, RLHF for LLMs</td></tr>
+</table>
+<div class="callout note"><b class="t">Vocabulary</b><b>Features</b> (X) are input columns such as weight, height and age. The <b>label or target</b> (y) is what you predict, such as gender. A <b>model</b> is the learned function f(X) ≈ y. Getting the right features is often worth more than choosing the right algorithm.</div>
+
+<h3>Kinds of data</h3>
+<table>
+<tr><th>Type</th><th>Examples</th><th>Typical tools</th></tr>
+<tr><td>Structured</td><td>SQL tables, CSV, Salesforce objects</td><td>pandas, classic ML</td></tr>
+<tr><td>Semi-structured</td><td>JSON, XML, logs, emails</td><td>Parsers, then ML or LLMs</td></tr>
+<tr><td>Unstructured</td><td>Text, PDF, images, audio, video</td><td>Deep learning, LLMs, embeddings</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ============================ 12 ============================ -->
+<section id="s12">
+<h2><span class="num">12</span> The ML Workflow &amp; Library Stack</h2>
+<div class="body">
+<div class="flow">
+  <div class="step"><b>1 Load</b>CSV, DB, URL, toy dataset</div><div class="arrow">→</div>
+  <div class="step"><b>2 Analyse (EDA)</b><code>describe()</code>, plots, correlation</div><div class="arrow">→</div>
+  <div class="step"><b>3 Clean</b>Missing values, outliers, encoding, scaling</div><div class="arrow">→</div>
+  <div class="step"><b>4 Split</b>Train / test (70/30 or 80/20)</div><div class="arrow">→</div>
+  <div class="step"><b>5 Train</b><code>model.fit()</code></div><div class="arrow">→</div>
+  <div class="step"><b>6 Evaluate</b><code>predict()</code> + metrics</div><div class="arrow">→</div>
+  <div class="step"><b>7 Tune</b>Hyperparameters, features, algorithm</div><div class="arrow">→</div>
+  <div class="step"><b>8 Deploy &amp; monitor</b>joblib, API, drift checks</div>
+</div>
+
+<div class="widget"><h4>Train / test split visualiser (Iris dataset, 150 rows)</h4>
+<div class="inrow"><label>Training share</label><input type="range" id="splitR" min="50" max="90" value="70"><b id="splitV">70%</b></div>
+<div class="split" style="margin-top:10px"><div id="trainBar" style="background:var(--accent)"></div><div id="testBar" style="background:var(--accent2)"></div></div>
+<p style="font-size:.85rem;color:var(--muted);margin:8px 0 0">The model learns from <code>X_train, y_train</code>, then predicts on the unseen <code>X_test</code>, and those predictions are compared with <code>y_test</code>. Always pass <code>random_state</code> for reproducibility and <code>stratify=y</code> to keep class ratios equal in both parts.</p>
+</div>
+<table style="max-width:520px">
+<tr><th></th><th>Features (X)</th><th>Label (y)</th></tr>
+<tr><td><b>Train</b> (70–80%)</td><td><code>X_train</code></td><td><code>y_train</code></td></tr>
+<tr><td><b>Test</b> (20–30%)</td><td><code>X_test</code></td><td><code>y_test</code> (expected answers)</td></tr>
+</table>
+
+<h3>Library stack</h3>
+<table>
+<tr><th>Library</th><th>Role</th><th>Think of it as</th></tr>
+<tr><td><b>NumPy</b></td><td>N-dimensional arrays, vectorised maths</td><td>The foundation under everything else</td></tr>
+<tr><td><b>pandas</b></td><td>Tabular data: <code>Series</code> (1-D) and <code>DataFrame</code> (2-D)</td><td>An in-memory SQL table, or a LINQ-able DataTable</td></tr>
+<tr><td><b>Matplotlib / Seaborn</b></td><td>Plotting (Seaborn is a higher-level statistical layer on Matplotlib)</td><td>Charts</td></tr>
+<tr><td><b>scikit-learn</b></td><td>Classic ML with a uniform <code>fit</code> / <code>predict</code> / <code>transform</code> API</td><td>The ML.NET of Python (but richer)</td></tr>
+<tr><td><b>SciPy</b></td><td>Scientific computing: statistics, optimisation, signal processing</td><td>Math.NET</td></tr>
+<tr><td><b>TensorFlow + Keras</b></td><td>Deep learning (Keras 3 is the high-level API)</td><td>Google's DL stack</td></tr>
+<tr><td><b>PyTorch</b></td><td>Deep learning; dominant in research and GenAI</td><td>Meta's DL stack; most LLM code uses it</td></tr>
+</table>
+<div class="callout fix"><b class="t">Fixes</b>scikit-learn was <b>not</b> created by Google. It began as a Google Summer of Code project by David Cournapeau and is maintained by an open-source community led from INRIA. The pandas <code>Panel</code> (3-D) was removed in pandas 0.25; use a MultiIndex DataFrame or <code>xarray</code> instead. TensorFlow 2.21 supports Python <b>3.10–3.13</b> (3.14 arrives in 2.22). If you see "Could not find a version that satisfies the requirement tensorflow", your Python version is unsupported.</div>
+
+<h3>End-to-end example (Iris)</h3>
+<pre><code class="language-python">import pandas as pd
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+
+iris = load_iris(as_frame=True)                       # toy dataset bundled with sklearn
+df = iris.frame
+print(df.describe())                                  # count, mean, std, min, quartiles, max
+
+X, y = df.drop(columns="target"), df["target"]
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y)
+
+model = DecisionTreeClassifier(max_depth=3, random_state=42)
+model.fit(X_train, y_train)                           # TRAIN
+y_pred = model.predict(X_test)                        # TEST
+
+print(accuracy_score(y_test, y_pred))
+print(confusion_matrix(y_test, y_pred))
+print(classification_report(y_test, y_pred, target_names=iris.target_names))</code></pre>
+<div class="callout real"><b class="t">Case study pattern: cricket ball vs tennis ball</b>The features are weight and surface (rough or smooth), and the label is the ball type. Clean the data by removing objects that are neither ball. <b>Encode</b> text to numbers (rough=1, smooth=0). Split the data, choose an algorithm, <code>fit</code>, <code>predict</code> and measure accuracy. Then reshuffle and repeat, and tune either the parameters (<i>parameter tuning</i>) or the algorithm itself (<i>algorithm tuning</i>).</div>
+<p><b>Classic practice datasets</b>: Iris, Titanic survival, diabetes, breast cancer, wine, spam email, house prices, MNIST handwritten digits, Fashion-MNIST (apparel), and HeadBrain (head size vs brain weight). Get more from <a href="https://www.kaggle.com/datasets" target="_blank">Kaggle</a> and the UCI ML Repository.</p>
+</div>
+</section>
+
+<!-- ============================ 13 ============================ -->
+<section id="s13">
+<h2><span class="num">13</span> Statistics You Actually Need</h2>
+<div class="body">
+<div class="grid-2">
+<div class="card"><h4>Central tendency</h4>
+<p><b>Mean</b> \( \bar{x} = \frac{1}{n}\sum_{i=1}^{n} x_i \)</p>
+<p><b>Median</b>: the middle value of the sorted data. With an even count, it is the average of the two middle values. Robust to outliers.</p>
+<p><b>Mode</b>: the most frequent value.</p></div>
+<div class="card"><h4>Spread</h4>
+<p><b>Sample standard deviation</b> (Bessel's correction):</p>
+\[ s = \sqrt{\frac{\sum_{i=1}^{n}(x_i-\bar{x})^2}{n-1}} \]
+<p style="font-size:.85rem;color:var(--muted)">Divide by \(n\) instead of \(n-1\) for the population standard deviation \(\sigma\). Variance is \(s^2\).</p></div>
+</div>
+<div class="grid-2">
+<div class="card"><h4>Quartiles &amp; outliers (IQR rule)</h4>
+<p>Q1 is the 25th percentile, Q2 the 50th (the median) and Q3 the 75th. \( IQR = Q3 - Q1 \)</p>
+<p>A value is an outlier if \( x &lt; Q1 - 1.5\,IQR \) or \( x &gt; Q3 + 1.5\,IQR \). This is exactly what a box plot draws.</p></div>
+<div class="card"><h4>Pearson correlation</h4>
+\[ r = \frac{\sum (x_i-\bar{x})(y_i-\bar{y})}{\sqrt{\sum (x_i-\bar{x})^2}\,\sqrt{\sum (y_i-\bar{y})^2}} \]
+<p style="font-size:.85rem">\(r\) ranges from −1 to +1. Values near +1 mean the variables are directly proportional, values near −1 mean they are inversely proportional, and values near 0 mean there is no <i>linear</i> relation. Correlation does not imply causation.</p></div>
+</div>
+<pre><code class="language-python">df.describe()                                   # quick stats (mean, std, quartiles)
+df.corr(numeric_only=True)["Survived"].sort_values()   # rank features against the target
+q1, q3 = df["Fare"].quantile([.25, .75]); iqr = q3 - q1
+df = df[df["Fare"].between(q1 - 1.5 * iqr, q3 + 1.5 * iqr)]   # drop outliers
+
+import seaborn as sns, matplotlib.pyplot as plt
+sns.heatmap(df.corr(numeric_only=True), annot=True, cmap="coolwarm")
+plt.savefig("artifacts/correlation.png")        # save instead of plt.show() in pipelines</code></pre>
+<div class="callout note"><b class="t">Key point</b>Detect and handle outliers during <b>data analysis</b>, before training. Outliers distort the mean, the standard deviation and linear models. Tree-based models are more tolerant of them.</div>
+</div>
+</section>
+
+<!-- ============================ 14 ============================ -->
+<section id="s14">
+<h2><span class="num">14</span> Supervised Learning: Classification</h2>
+<div class="body">
+<p>Classification predicts <b>discrete categories</b>. It is <b>binary</b> for two classes (cricket or tennis ball, spam or not) and <b>multi-class</b> for more (the Iris species setosa, versicolor and virginica).</p>
+<table>
+<tr><th>Algorithm</th><th>Intuition</th><th>Strengths</th><th>Watch out</th></tr>
+<tr><td><b>Decision Tree</b></td><td>A chain of if/else questions; the leaf node gives the class</td><td>Interpretable, no scaling needed</td><td>Overfits easily (limit <code>max_depth</code>)</td></tr>
+<tr><td><b>Random Forest</b></td><td>Many trees on random samples, combined by majority vote (bagging)</td><td>Strong default, gives feature importance</td><td>Slower, less interpretable</td></tr>
+<tr><td><b>K-Nearest Neighbours</b></td><td>Find the K closest training points; the majority class wins</td><td>Simple, no training phase</td><td>"Lazy": prediction is expensive; needs feature scaling</td></tr>
+<tr><td><b>Logistic Regression</b></td><td>A linear score squeezed through a sigmoid into a probability</td><td>Fast, probabilistic, great baseline for binary tasks</td><td>Only linear decision boundaries</td></tr>
+<tr><td><b>SVM (SVC)</b></td><td>The hyperplane with the widest margin; kernels allow curved boundaries</td><td>Good on small to medium, high-dimensional data</td><td>Slow on large datasets; needs scaling</td></tr>
+</table>
+
+<h3>K-Nearest Neighbours</h3>
+<div class="grid-2">
+<div class="card"><b>Euclidean distance</b> (the default)
+\[ d(p,q)=\sqrt{\sum_{i=1}^{n}(p_i-q_i)^2} \]</div>
+<div class="card"><b>Manhattan distance</b> (city-block)
+\[ d(p,q)=\sum_{i=1}^{n}\lvert p_i-q_i\rvert \]</div>
+</div>
+<p>Algorithm: compute the distance from the new point to every training point, sort, take the K nearest, and return the most common label. Use an <b>odd K</b> for binary problems to avoid ties. K is a <b>hyperparameter</b>: choose it by plotting accuracy (or error) against K and picking the elbow.</p>
+
+<h3>Logistic regression</h3>
+\[ \hat{p} = \sigma(z) = \frac{1}{1+e^{-z}}, \qquad z = b + w_1x_1 + \dots + w_nx_n \]
+<p>Here \(e \approx 2.71828\) is Euler's number. The output lies in (0, 1). The default rule is to predict 1 when \(\hat{p} \ge 0.5\), but you can move the <b>threshold</b> to suit the business. For cancer screening you would lower it to catch more true cases.</p>
+
+<h3>Support Vector Machine</h3>
+<p><b>Hyperplane</b>: the decision boundary (a line in 2-D, a plane in 3-D). <b>Margin</b>: the gap between the hyperplane and the nearest points. <b>Support vectors</b>: the nearest points, which alone define the boundary. <b>Kernel trick</b> (RBF, polynomial): implicitly maps the data into a higher dimension (1-D to 2-D, 2-D to 3-D) where it becomes separable. Use <code>SVC</code> for classification and <code>SVR</code> for regression.</p>
+
+<pre><code class="language-python">from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.svm import SVC
+
+models = {
+    "KNN":    make_pipeline(StandardScaler(), KNeighborsClassifier(n_neighbors=5)),
+    "LogReg": make_pipeline(StandardScaler(), LogisticRegression(max_iter=1000)),
+    "SVM":    make_pipeline(StandardScaler(), SVC(kernel="rbf", C=1.0)),
+    "Forest": RandomForestClassifier(n_estimators=200, random_state=42),
+}
+for name, m in models.items():
+    m.fit(X_train, y_train)
+    print(f"{name:7s} {m.score(X_test, y_test):.3f}")</code></pre>
+<div class="callout real"><b class="t">Real-world mapping (Salesforce)</b>Lead scoring (convert or not), churn prediction, case routing (which queue), opportunity win probability. Einstein Prediction Builder runs exactly this kind of classifier on CRM objects.</div>
+</div>
+</section>
+
+<!-- ============================ 15 ============================ -->
+<section id="s15">
+<h2><span class="num">15</span> Supervised Learning: Regression</h2>
+<div class="body">
+<p>Regression predicts <b>continuous numbers</b>, such as a student's percentage, a flat price or demand.</p>
+<div class="grid-2">
+<div class="card"><b>Simple linear regression</b> (one feature):
+\[ \hat{y} = mx + c \]
+<b>Multiple linear regression</b> (one coefficient per feature):
+\[ \hat{y} = c + m_1x_1 + m_2x_2 + \dots + m_nx_n \]</div>
+<div class="card"><b>Polynomial regression</b> (curved relationships):
+\[ \hat{y} = c + m_1x + m_2x^2 + \dots + m_dx^d \]
+<span style="font-size:.85rem;color:var(--muted)">Still "linear" in the coefficients: it is linear regression on generated features (<code>PolynomialFeatures</code>).</span></div>
+</div>
+<h3>How the line is learned: cost and gradient descent</h3>
+<p>The <b>cost function</b> (Mean Squared Error) measures how wrong the line is:</p>
+\[ J(m,c) = \frac{1}{n}\sum_{i=1}^{n}(y_i-\hat{y}_i)^2 \]
+<p><b>Gradient descent</b> repeatedly nudges each parameter downhill on the cost surface, where \(\alpha\) is the learning rate:</p>
+\[ m := m - \alpha\frac{\partial J}{\partial m}, \qquad c := c - \alpha\frac{\partial J}{\partial c} \]
+<div class="callout real"><b class="t">Analogy</b>You are walking down a foggy hill blindfolded and can only feel the slope under your feet. You take small steps downhill until the ground is flat; that flat spot is the minimum cost. If the learning rate is too large you overshoot, and if it is too small the walk takes forever.</div>
+<pre><code class="language-python">from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score, mean_absolute_error
+
+df = pd.read_csv("HeadBrain.csv")              # Gender, AgeRange, HeadSize, BrainWeight
+X, y = df[["HeadSize", "Gender"]], df["BrainWeight"]
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+reg = LinearRegression().fit(X_train, y_train)
+print("slope(s):", reg.coef_, "intercept:", reg.intercept_)
+pred = reg.predict(X_test)
+print("R2:", r2_score(y_test, pred), "MAE:", mean_absolute_error(y_test, pred))</code></pre>
+<div class="callout note"><b class="t">Linear vs logistic regression</b>Linear regression outputs an unbounded number, is fitted by minimising MSE and is used for regression. Logistic regression outputs a probability between 0 and 1 via the sigmoid, is fitted by minimising log-loss and, despite its name, is used for <b>classification</b>.</div>
+</div>
+</section>
+
+<!-- ============================ 16 ============================ -->
+<section id="s16">
+<h2><span class="num">16</span> Evaluating Models</h2>
+<div class="body">
+<h3>Confusion matrix (binary)</h3>
+<table style="max-width:620px">
+<tr><th></th><th>Predicted Negative</th><th>Predicted Positive</th></tr>
+<tr><th>Actual Negative</th><td>✅ <b>TN</b>: correctly rejected</td><td>❌ <b>FP</b>: false alarm (Type I error)</td></tr>
+<tr><th>Actual Positive</th><td>❌ <b>FN</b>: missed case (Type II error)</td><td>✅ <b>TP</b>: correctly detected</td></tr>
+</table>
+<div class="grid-2">
+<div class="card">
+\[ \text{Accuracy} = \frac{TP+TN}{TP+TN+FP+FN} \]
+\[ \text{Precision} = \frac{TP}{TP+FP} \]
+</div>
+<div class="card">
+\[ \text{Recall (Sensitivity)} = \frac{TP}{TP+FN} \]
+\[ F_1 = 2\cdot\frac{\text{Precision}\cdot\text{Recall}}{\text{Precision}+\text{Recall}} = \frac{2TP}{2TP+FP+FN} \]
+</div>
+</div>
+<div class="widget"><h4>Confusion matrix calculator</h4>
+<div class="inrow">
+ <label>TP <input type="number" id="cmTP" value="90" min="0"></label>
+ <label>FN <input type="number" id="cmFN" value="10" min="0"></label>
+ <label>FP <input type="number" id="cmFP" value="40" min="0"></label>
+ <label>TN <input type="number" id="cmTN" value="860" min="0"></label>
+ <button class="btn" data-preset="90,10,40,860">Cancer screening</button>
+ <button class="btn" data-preset="0,10,0,990">"Always negative" model</button>
+</div>
+<div class="cm" id="cmGrid"></div>
+<div id="cmMetrics"></div>
+<p id="cmInsight" style="font-size:.88rem;color:var(--muted)"></p>
+</div>
+<div class="callout warn"><b class="t">Which metric matters?</b>
+<b>Recall</b> matters when missing a case is costly: cancer, fraud, security breaches. <b>Precision</b> matters when false alarms are costly: spam filters that might bin a real email, auto-blocking customers. Use <b>F1</b> or PR-AUC on <b>imbalanced</b> data, because 99% accuracy can be useless when 99% of rows are negative (try the "always negative" preset). <code>classification_report</code> prints precision, recall, F1 and <i>support</i> (the number of true samples per class).</div>
+
+<h3>Regression: R², the coefficient of determination</h3>
+\[ R^2 = 1 - \frac{\sum_{i}(y_i-\hat{y}_i)^2}{\sum_{i}(y_i-\bar{y})^2} \]
+<p>A value of 1 is a perfect fit. A value of 0 is no better than always predicting the mean, and the value <i>can be negative</i> for a model worse than that. Also report MAE and RMSE, which are in business units ("off by ₹2.1 lakh on average").</p>
+
+<h3>Bias–variance trade-off</h3>
+<table>
+<tr><th></th><th>Underfitting</th><th>Good fit ✅</th><th>Overfitting</th></tr>
+<tr><td>Training accuracy</td><td>Low</td><td>High (e.g. ~85–90%)</td><td>Near 100%</td></tr>
+<tr><td>Test accuracy</td><td>Low</td><td>Close to training accuracy</td><td>Much lower than training</td></tr>
+<tr><td>Bias / variance</td><td>High bias, low variance</td><td>Low bias, low variance</td><td>Low bias, high variance</td></tr>
+<tr><td>Analogy</td><td>A student who didn't study</td><td>A student who understands the concepts</td><td>A student who memorised past papers</td></tr>
+<tr><td>Fix</td><td>A more complex model, more features</td><td>Ship it</td><td>More data, regularisation (L1/L2), pruning, dropout, cross-validation</td></tr>
+</table>
+<pre><code class="language-python">from sklearn.model_selection import cross_val_score
+scores = cross_val_score(RandomForestClassifier(random_state=42), X, y, cv=5)
+print(scores.mean(), scores.std())     # more reliable than a single train/test split</code></pre>
+</div>
+</section>
+
+<!-- ============================ 17 ============================ -->
+<section id="s17">
+<h2><span class="num">17</span> Tuning, Feature Importance &amp; Ensembles</h2>
+<div class="body">
+<h3>Hyperparameters</h3>
+<p><b>Parameters</b> are learned during <code>fit</code>: weights, slopes, tree splits. <b>Hyperparameters</b> are set by you before training and change how the model learns, for example <code>max_depth</code>, <code>n_neighbors</code>, <code>C</code>, <code>n_estimators</code> or the learning rate. Not every constructor argument is a meaningful hyperparameter; <code>random_state</code> and <code>n_jobs</code>, for example, are not.</p>
+<pre><code class="language-python">from sklearn.model_selection import GridSearchCV
+grid = GridSearchCV(RandomForestClassifier(random_state=42),
+                    {"n_estimators": [100, 300], "max_depth": [None, 5, 10]},
+                    cv=5, scoring="f1_macro", n_jobs=-1)
+grid.fit(X_train, y_train)
+print(grid.best_params_, grid.best_score_)
+
+importances = pd.Series(grid.best_estimator_.feature_importances_, index=X.columns)
+print(importances.sort_values(ascending=False))   # drop the weak features, then retrain</code></pre>
+<div class="callout tip"><b class="t">Improvement checklist, in order</b>Get better data and clean it, then engineer and select features (feature importance, correlation), then tune hyperparameters, then try another algorithm, and only then try an ensemble.</div>
+
+<h3>Ensemble learning</h3>
+<p>An ensemble combines several models so that their errors cancel out, like a jury rather than a single judge. It costs more compute and training time. A <b>homogeneous</b> ensemble uses the same algorithm many times; a <b>heterogeneous</b> one mixes different algorithms.</p>
+<table>
+<tr><th>Technique</th><th>How</th><th>Execution</th><th>Reduces</th><th>Examples</th></tr>
+<tr><td><b>Bagging</b></td><td>Train models on random bootstrap samples (with replacement) and average or vote</td><td>Parallel</td><td>Variance (overfitting)</td><td>Random Forest, <code>BaggingClassifier</code></td></tr>
+<tr><td><b>Boosting</b></td><td>Train models one after another; each focuses on the previous model's mistakes (misclassified rows get higher weights)</td><td>Sequential</td><td>Bias (and variance)</td><td>AdaBoost, Gradient Boosting, <b>XGBoost</b>, LightGBM, CatBoost</td></tr>
+<tr><td><b>Voting</b></td><td>Different algorithms vote. <i>Hard</i> voting takes the majority class; <i>soft</i> voting averages the probabilities.</td><td>Parallel</td><td>Individual model weaknesses</td><td><code>VotingClassifier</code></td></tr>
+<tr><td><b>Stacking</b></td><td>A meta-model learns how to combine the base models' predictions</td><td>Two levels</td><td>Both</td><td><code>StackingClassifier</code></td></tr>
+</table>
+<pre><code class="language-python">from sklearn.ensemble import VotingClassifier
+vote = VotingClassifier(
+    estimators=[("lr", LogisticRegression(max_iter=1000)),
+                ("rf", RandomForestClassifier(random_state=42)),
+                ("knn", KNeighborsClassifier())],
+    voting="soft")             # "hard" = majority label, "soft" = average of predict_proba
+vote.fit(X_train, y_train); print(vote.score(X_test, y_test))</code></pre>
+<div class="callout note"><b class="t">Industry reality</b>For <b>tabular</b> business data (CRM, finance), gradient-boosted trees such as XGBoost and LightGBM usually beat neural networks. Learn them well.</div>
+</div>
+</section>
+
+<!-- ============================ 18 ============================ -->
+<section id="s18">
+<h2><span class="num">18</span> Unsupervised Learning: K-Means &amp; DBSCAN</h2>
+<div class="body">
+<p>Unsupervised data has no labels, so there is no "accuracy". Quality is judged with internal metrics (WCSS, silhouette score) and business sense. A useful trick for unlabelled data: cluster it first, give the clusters temporary labels, and use them to understand the data.</p>
+<div class="grid-2">
+<div class="card"><h4>K-Means</h4>
+<ol style="padding-left:18px;margin:0">
+<li>Choose K, the number of clusters</li>
+<li>Place K centroids (k-means++ chooses them smartly)</li>
+<li>Assign each point to the nearest centroid (Euclidean distance)</li>
+<li>Move each centroid to the mean of its points</li>
+<li>Repeat until assignments stop changing</li>
+</ol>
+<p><b>WCSS</b> (Within-Cluster Sum of Squares), which K-Means minimises:</p>
+\[ \text{WCSS}=\sum_{k=1}^{K}\sum_{x\in C_k}\lVert x-\mu_k\rVert^2 \]
+<p style="font-size:.86rem"><b>Elbow method</b>: plot WCSS against K and pick the K where the curve bends, because beyond that point extra clusters give diminishing returns.</p></div>
+<div class="card"><h4>DBSCAN (density-based)</h4>
+<ul style="padding-left:18px;margin:0">
+<li><b>eps</b> (ε): the neighbourhood radius</li>
+<li><b>min_samples</b>: the minimum number of points within ε for a dense region</li>
+<li><b>Core point</b>: has at least <code>min_samples</code> points within ε</li>
+<li><b>Border point</b>: within ε of a core point, but not dense itself</li>
+<li><b>Noise point</b>: neither core nor border, so it is labelled <code>-1</code> (an outlier)</li>
+</ul>
+<p style="font-size:.86rem">DBSCAN finds clusters of arbitrary shape, needs no K, and flags outliers during fitting. Choose ε from the "knee" of a k-distance plot.</p></div>
+</div>
+<pre><code class="language-python">from sklearn.cluster import KMeans, DBSCAN
+from sklearn.preprocessing import StandardScaler
+
+X = StandardScaler().fit_transform(load_iris().data)     # labels are ignored on purpose
+
+wcss = [KMeans(n_clusters=k, n_init="auto", random_state=42).fit(X).inertia_ for k in range(1, 11)]
+plt.plot(range(1, 11), wcss, marker="o"); plt.xlabel("K"); plt.ylabel("WCSS")
+plt.savefig("artifacts/elbow.png")                        # the elbow appears around K=3
+
+labels = KMeans(n_clusters=3, n_init="auto", random_state=42).fit_predict(X)
+noise  = (DBSCAN(eps=0.6, min_samples=5).fit_predict(X) == -1).sum()</code></pre>
+<div class="callout fix"><b class="t">Fix</b>DBSCAN is not the <i>only</i> algorithm that handles outliers. Isolation Forest, Local Outlier Factor and One-Class SVM are dedicated anomaly detectors, and HDBSCAN is a newer density-based method that needs less tuning.</div>
+<div class="callout real"><b class="t">Real life</b>Customer segmentation for marketing campaigns, anomaly detection in login patterns or transactions, grouping similar support cases, and de-duplicating Accounts.</div>
+</div>
+</section>
+
+<!-- ============================ 19 ============================ -->
+<section id="s19">
+<h2><span class="num">19</span> Shipping a Model: Persistence, Pipelines &amp; Structure</h2>
+<div class="body">
+<div class="flow">
+  <div class="step"><b>Clean</b>Handle outliers and missing values (median or mean for numbers, mode or "Unknown" for text)</div><div class="arrow">→</div>
+  <div class="step"><b>Encode / scale</b>One-hot encoding, standard scaling</div><div class="arrow">→</div>
+  <div class="step"><b>Train</b>As a Pipeline</div><div class="arrow">→</div>
+  <div class="step"><b>Persist</b><code>joblib.dump</code></div><div class="arrow">→</div>
+  <div class="step"><b>Serve</b>CLI, FastAPI, batch job</div>
+</div>
+<pre><code class="language-python">import joblib
+from sklearn.compose import ColumnTransformer
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.pipeline import Pipeline, make_pipeline
+
+num, cat = ["Age", "Fare"], ["Sex", "Embarked"]
+prep = ColumnTransformer([
+    ("num", make_pipeline(SimpleImputer(strategy="median"), StandardScaler()), num),
+    ("cat", make_pipeline(SimpleImputer(strategy="most_frequent"),
+                          OneHotEncoder(handle_unknown="ignore")), cat)])
+pipe = Pipeline([("prep", prep), ("model", RandomForestClassifier(random_state=42))])
+pipe.fit(X_train, y_train)
+
+joblib.dump(pipe, "artifacts/titanic_model.joblib")      # preprocessing + model in one file
+model = joblib.load("artifacts/titanic_model.joblib")
+model.predict(pd.DataFrame([{"Age": 30, "Fare": 50, "Sex": "female", "Embarked": "S"}]))</code></pre>
+<div class="callout note"><b class="t">Why Pipelines?</b>A Pipeline prevents <b>data leakage</b> because the scaler and imputer are fitted only on training data. It also guarantees that identical preprocessing runs at prediction time, and it gives you one artifact to version. Joblib files are large because they serialise every learned array; a 500-tree forest stores 500 trees. Load joblib or pickle files only from trusted sources, because loading one can execute code.</div>
+
+<h3>Case-study repository layout</h3>
+<pre><code class="language-text">DiabetesCaseStudy/
+├── README.md            # problem, dataset, how to run, results table per algorithm
+├── requirements.txt     # pinned dependencies
+├── data/diabetes.csv
+├── src/diabetes.py      # small functions + main(); CLI: --train / --predict
+├── artifacts/           # best_model.joblib, confusion_matrix.png, elbow.png
+└── tests/test_model.py</code></pre>
+<pre><code class="language-bash">python src/diabetes.py --train                       # trains, compares algorithms, saves the best model
+python src/diabetes.py --predict "6,148,72,35,0,33.6,0.627,50"</code></pre>
+<div class="callout tip"><b class="t">Best practices</b>Save plots with <code>plt.savefig()</code> instead of <code>plt.show()</code>, which blocks unattended runs. Log metrics per run with <b>MLflow</b>. Serve the model behind FastAPI in a Docker container, and monitor it for <b>data drift</b>. Very large models are sharded (split across files or devices) when they don't fit in memory.</div>
+</div>
+</section>
+
+<!-- ============================ 20 ============================ -->
+<section id="s20">
+<h2><span class="num">20</span> Neural Networks Fundamentals</h2>
+<div class="body">
+<p>An artificial neural network is loosely inspired by biological neurons. Layers of <b>neurons</b> are connected by weighted edges and arranged as an <b>input layer</b>, one or more <b>hidden layers</b>, and an <b>output layer</b>. A network with many hidden layers is a "deep" network.</p>
+<div class="grid-2">
+<div class="card"><h4>One neuron</h4>
+Weighted sum plus bias, passed through an activation \(f\):
+\[ z = \sum_{i=1}^{n} w_i x_i + b, \qquad a = f(z) \]</div>
+<div class="card"><h4>Training loop</h4>
+<ol style="padding-left:18px;margin:0"><li><b>Forward pass</b>: compute the prediction</li><li><b>Loss</b>: the gap between prediction and truth (MSE, cross-entropy)</li><li><b>Backpropagation</b>: the chain rule gives each weight's gradient</li><li><b>Optimiser</b> (SGD, Adam) updates the weights</li><li>Repeat for several <b>epochs</b></li></ol></div>
+</div>
+
+<h3>Activation functions</h3>
+<table>
+<tr><th>Function</th><th>Formula</th><th>Range</th><th>Typical use</th></tr>
+<tr><td>Sigmoid</td><td>\( \sigma(z)=\frac{1}{1+e^{-z}} \)</td><td>(0, 1)</td><td>Binary output layer</td></tr>
+<tr><td>Tanh</td><td>\( \tanh(z)=\frac{e^{z}-e^{-z}}{e^{z}+e^{-z}} \)</td><td>(−1, 1)</td><td>RNN hidden layers (zero-centred)</td></tr>
+<tr><td>ReLU</td><td>\( \max(0, z) \)</td><td>[0, ∞)</td><td><b>Default for hidden layers</b></td></tr>
+<tr><td>Leaky ReLU</td><td>\( z \text{ if } z&gt;0 \text{, else } \alpha z \) (α ≈ 0.01)</td><td>(−∞, ∞)</td><td>Avoids "dead" ReLU neurons</td></tr>
+<tr><td>Softmax</td><td>\( \frac{e^{z_k}}{\sum_j e^{z_j}} \)</td><td>(0, 1), sums to 1</td><td>Multi-class output layer</td></tr>
+<tr><td>GELU / SiLU</td><td>\( z\,\Phi(z) \) / \( z\,\sigma(z) \)</td><td>≈ [−0.17, ∞)</td><td>Transformers and LLMs</td></tr>
+</table>
+<div class="widget"><h4>Activation function plotter</h4>
+<div class="inrow" id="actToggles">
+ <label><input type="checkbox" value="sigmoid" checked> <span style="color:#58a6ff">Sigmoid</span></label>
+ <label><input type="checkbox" value="tanh" checked> <span style="color:#3fb950">Tanh</span></label>
+ <label><input type="checkbox" value="relu" checked> <span style="color:#f0883e">ReLU</span></label>
+ <label><input type="checkbox" value="leaky"> <span style="color:#bc8cff">Leaky ReLU (α=0.1 so it's visible)</span></label>
+</div>
+<canvas id="actCanvas" width="760" height="300"></canvas>
+<p id="actReadout" style="font-size:.85rem;color:var(--muted);margin:6px 0 0">Hover over the chart to read the values.</p>
+</div>
+<div class="callout tip"><b class="t">Which activation should I use?</b>Use ReLU (or GELU) in hidden layers. For the output layer, use sigmoid for binary problems, softmax for multi-class, and none (linear) for regression. Avoid sigmoid and tanh in deep hidden stacks because they cause <b>vanishing gradients</b>.</div>
+</div>
+</section>
+
+<!-- ============================ 21 ============================ -->
+<section id="s21">
+<h2><span class="num">21</span> Network Architectures: FNN, CNN, RNN, Transformers</h2>
+<div class="body">
+<table>
+<tr><th>Architecture</th><th>Best for</th><th>Key idea</th><th>Example</th></tr>
+<tr><td><b>FNN / MLP</b> (feed-forward)</td><td>Tabular data</td><td>Data flows one way through dense layers</td><td>Diabetes prediction with <code>MLPClassifier</code></td></tr>
+<tr><td><b>CNN</b> (convolutional)</td><td>Grid data: images, video</td><td>Small kernels slide over the image to detect edges, then shapes, then objects</td><td>Face recognition, defect detection, MNIST digits</td></tr>
+<tr><td><b>RNN / LSTM / GRU</b></td><td>Sequences where order matters</td><td>A hidden state carries memory across timesteps</td><td>Sentiment analysis (many-to-one), next-word prediction</td></tr>
+<tr><td><b>Transformer</b></td><td>Sequences at scale: text, code, images</td><td><b>Self-attention</b> lets every token look at every other token, in parallel</td><td>GPT, BERT, translation (sequence-to-sequence)</td></tr>
+</table>
+<div class="callout note"><b class="t">CNN in one paragraph</b>A convolution layer multiplies a small kernel (for example a 3×3 edge detector) <i>element-wise</i> with each image patch and sums the result. This is not matrix multiplication. Early layers learn horizontal and vertical edges, and deeper layers learn eyes, wheels or text. Pooling layers shrink the feature maps, and dense layers make the final classification. OpenCV, originally from Intel and now open source, handles the classic computer-vision preprocessing.</div>
+
+<h3>Transformers: "Attention Is All You Need" (Google, 2017)</h3>
+\[ \text{Attention}(Q,K,V)=\text{softmax}\!\left(\frac{QK^{\top}}{\sqrt{d_k}}\right)V \]
+<p>Each token produces a <b>Query</b> ("what am I looking for?"), a <b>Key</b> ("what do I contain?") and a <b>Value</b> ("what do I pass on?"). The scaled dot products decide how much each token attends to the others. Unlike RNNs, Transformers process the whole sequence in parallel on GPUs, which is why they scale to LLMs.</p>
+<div class="grid-2">
+<div class="card"><b>BERT</b> (Bidirectional Encoder Representations from Transformers): <b>encoder-only</b>. It reads context in both directions, so it is used for <i>understanding</i> tasks: classification, search, named-entity recognition, embeddings.</div>
+<div class="card"><b>GPT</b> (Generative Pre-trained Transformer): <b>decoder-only</b>. It predicts the next token from left to right, so it is used for <i>generation</i>: chat, code, summaries.</div>
+</div>
+<pre><code class="language-python">import keras
+from keras import layers
+
+model = keras.Sequential([
+    layers.Input(shape=(8,)),                 # 8 tabular features
+    layers.Dense(32, activation="relu"),
+    layers.Dropout(0.2),                      # regularisation against overfitting
+    layers.Dense(16, activation="relu"),
+    layers.Dense(1, activation="sigmoid"),    # binary output
+])
+model.compile(optimizer="adam", loss="binary_crossentropy", metrics=["accuracy"])
+model.fit(X_train, y_train, epochs=50, batch_size=32, validation_split=0.2)
+model.save("artifacts/diabetes.keras")
+
+# quickest DL baseline inside sklearn:
+from sklearn.neural_network import MLPClassifier
+MLPClassifier(hidden_layer_sizes=(32, 16), max_iter=1000).fit(X_train, y_train)</code></pre>
+<div class="callout fix"><b class="t">Fixes</b>All neural networks (FNN, CNN and RNN) are trained with <b>backpropagation</b>; RNNs use the variant <i>backpropagation through time</i>, and frameworks compute it automatically. "ML doesn't learn on its own, DL does" is better stated as: classic ML depends on <b>hand-engineered features</b>, while deep learning <b>learns the features itself</b> from raw data. LLMs are trained and served mostly through Python frameworks (PyTorch, JAX) on top of C++ and CUDA kernels; tools such as <code>llama.cpp</code> are C++ runtimes for <i>running</i> them.</div>
+</div>
+</section>
+
+<!-- ============================ 22 ============================ -->
+<section id="s22">
+<h2><span class="num">22</span> LLMs, RAG, MCP &amp; Agents</h2>
+<div class="body">
+<h3>RAG: Retrieval-Augmented Generation</h3>
+<p>RAG grounds an LLM in <b>your</b> data (policies, knowledge articles, Confluence or XWiki pages, Salesforce records) without retraining it. This reduces hallucinations and keeps answers current.</p>
+<div class="flow">
+  <div class="step"><b>Ingest</b>Split documents into chunks</div><div class="arrow">→</div>
+  <div class="step"><b>Embed</b>Turn each chunk into a vector</div><div class="arrow">→</div>
+  <div class="step"><b>Store</b>Vector DB (pgvector, FAISS, Milvus, Weaviate)</div>
+</div>
+<div class="flow">
+  <div class="step"><b>User query</b></div><div class="arrow">→</div>
+  <div class="step"><b>Embed query</b></div><div class="arrow">→</div>
+  <div class="step"><b>Retrieve</b>Top-k similar chunks (cosine similarity)</div><div class="arrow">→</div>
+  <div class="step"><b>Augment</b>Prompt = instructions + context + question</div><div class="arrow">→</div>
+  <div class="step"><b>Generate</b>The LLM answers and cites its sources</div>
+</div>
+<p>Cosine similarity, used to rank chunks: \( \cos\theta=\frac{A\cdot B}{\lVert A\rVert\,\lVert B\rVert} \)</p>
+<div class="callout tip"><b class="t">RAG vs fine-tuning</b>Use <b>RAG</b> for knowledge: facts change, sources must be cited, and access control matters. Use <b>fine-tuning</b> (LoRA or QLoRA) for behaviour: tone, output format, domain jargon. Many production systems use both. To optimise RAG, use good chunking, hybrid search (BM25 plus vectors), a re-ranker and metadata filters, and run evaluations (for example with RAGAS).</div>
+
+<h3>MCP: Model Context Protocol</h3>
+<p>MCP is an open standard (introduced by Anthropic in 2024) for connecting AI applications to tools and data. An MCP <b>server</b> exposes <i>tools</i>, <i>resources</i> and <i>prompts</i> through one standard interface, so any MCP <b>client</b> (IDE, chat app, agent) can use Jira, Confluence, GitHub, Salesforce or Jenkins without custom integration code for each pair.</p>
+<div class="flow">
+  <div class="step"><b>AI client</b>Cursor, Claude, or a custom agent</div><div class="arrow">⇄</div>
+  <div class="step"><b>MCP protocol</b>JSON-RPC over stdio or HTTP</div><div class="arrow">⇄</div>
+  <div class="step"><b>MCP servers</b>Jira · GitHub · Salesforce · XWiki · DB</div>
+</div>
+<div class="callout cs"><b class="t">C# bridge</b>MCP is "USB-C for AI tools", or think of it as an adapter/facade pattern standardised across vendors. You can write MCP servers in C# with the official .NET SDK.</div>
+
+<h3>Model vs assistant vs agent</h3>
+<table>
+<tr><th></th><th>AI model</th><th>AI assistant</th><th>AI agent</th></tr>
+<tr><td>What it is</td><td>The raw learned function (GPT, Llama)</td><td>A model plus a chat UI and memory, which responds to the user</td><td>A model plus tools, a plan-act-observe loop and goals</td></tr>
+<tr><td>Autonomy</td><td>None</td><td>Reactive: one turn at a time</td><td>Multi-step and goal-directed</td></tr>
+<tr><td>Example</td><td>An embedding model</td><td>A Copilot chat answering questions</td><td>Salesforce Agentforce resolving a case end-to-end; a coding agent fixing a bug</td></tr>
+</table>
+<pre><code class="language-python"># Minimal RAG sketch (library-agnostic pseudocode)
+chunks  = split(load_docs("kb/"), size=800, overlap=100)
+vectors = embed(chunks)                        # e.g. an OpenAI / sentence-transformers model
+db.upsert(zip(chunks, vectors))
+
+def answer(question: str) -&gt; str:
+    context = db.search(embed([question])[0], top_k=5)
+    prompt  = f"Answer only from the context. Cite sources.\n\nContext:\n{context}\n\nQ: {question}"
+    return llm.generate(prompt)</code></pre>
+</div>
+</section>
+
+<!-- ============================ 23 ============================ -->
+<section id="s23">
+<h2><span class="num">23</span> Interview Flashcards</h2>
+<div class="body">
+<p style="color:var(--muted)">Click a question to reveal the answer. Try answering out loud first.</p>
+<h3>Python</h3>
+<details><summary>Regular function vs lambda?</summary><code>def</code> is named and can hold multiple statements, docstrings and type hints, and it is easy to test. A lambda is anonymous and limited to a single expression, so it suits short inline callbacks (<code>key=</code>, <code>map</code>). Every lambda can become a <code>def</code>, but not the other way round.</details>
+<details><summary>List vs tuple vs set vs dict?</summary>A list is ordered and mutable. A tuple is ordered, immutable and hashable, so it can be a dict key. A set is unordered, has unique elements and offers O(1) membership tests. A dict maps keys to values, preserves insertion order and offers O(1) lookup.</details>
+<details><summary>What is the GIL and how do you work around it?</summary>The Global Interpreter Lock allows one thread at a time to execute Python bytecode. Use threads or <code>asyncio</code> for I/O-bound work, <code>multiprocessing</code> for CPU-bound work, and C-backed libraries (NumPy) that release the GIL.</details>
+<details><summary>Shallow vs deep copy?</summary><code>copy.copy</code> copies the outer container, so nested objects stay shared. <code>copy.deepcopy</code> recursively copies everything.</details>
+<details><summary>What are decorators and generators?</summary>A decorator is a function that wraps another function to add behaviour (logging, caching, auth), applied with <code>@decorator</code>, similar to C# attributes plus middleware. A generator uses <code>yield</code> to produce values lazily, one at a time, which is memory-efficient for large streams. It is like C# <code>yield return</code> / <code>IEnumerable</code>.</details>
+<h3>Machine learning</h3>
+<details><summary>How does ML work, in one minute?</summary>You give an algorithm examples (features X and labels y). It adjusts internal parameters to minimise a loss function, which measures how wrong its predictions are. You validate it on held-out data to check that it generalises, then deploy it to predict on new data.</details>
+<details><summary>How does KNN work?</summary>Store the training data. For a new point, compute its distance (usually Euclidean) to all stored points, take the K nearest, and return the majority class (or, for regression, the mean). Scale the features first, and choose K with cross-validation or an elbow plot.</details>
+<details><summary>Linear vs logistic regression?</summary>Linear regression predicts a continuous value and minimises MSE. Logistic regression applies a sigmoid to a linear score to get a probability for classification, and minimises log-loss.</details>
+<details><summary>Explain the confusion matrix, precision, recall, F1 and support.</summary>The confusion matrix is the TP/FP/FN/TN table. Precision is TP/(TP+FP), "of the cases I flagged, how many were right?". Recall is TP/(TP+FN), "of the real cases, how many did I catch?". F1 is the harmonic mean of the two. Support is the count of true samples per class.</details>
+<details><summary>Explain the bias–variance trade-off.</summary>Bias is error from overly simple assumptions, which causes underfitting. Variance is sensitivity to the particular training data, which causes overfitting. Increasing model complexity lowers bias but raises variance. You aim for the sweet spot, validated with cross-validation and controlled through regularisation.</details>
+<details><summary>How do you detect and handle outliers?</summary>Use box plots or the IQR rule (outside Q1−1.5·IQR or Q3+1.5·IQR), z-scores (|z|&gt;3), or Isolation Forest / DBSCAN. Then remove, cap (winsorise) or transform them (for example with a log), but only after checking that they are errors rather than genuine rare events such as fraud.</details>
+<details><summary>Explain ensembles and Random Forest.</summary>An ensemble combines several models. Random Forest is a bagging ensemble of decision trees, each trained on a bootstrap sample with random feature subsets, and its predictions come from majority vote. It reduces the variance of a single tree. Boosting (XGBoost) trains models sequentially, each one correcting the previous model's errors.</details>
+<details><summary>How do you choose eps and min_samples in DBSCAN?</summary>A common heuristic for <code>min_samples</code> is at least the number of dimensions + 1, often 2×dims. For eps, plot each point's distance to its k-th nearest neighbour in sorted order and pick the "knee" of the curve.</details>
+<details><summary>How do you get summary statistics in pandas?</summary><code>df.describe()</code> gives count, mean, std, min, quartiles and max. Add <code>df.info()</code> for types and nulls, <code>df.corr()</code> for correlations, and <code>df.value_counts()</code> for class balance.</details>
+<h3>Deep learning &amp; GenAI</h3>
+<details><summary>Which activation function should you use?</summary>Hidden layers: ReLU or GELU. Output layer: sigmoid for binary, softmax for multi-class, linear for regression.</details>
+<details><summary>How does the Transformer work?</summary>Tokens become embeddings plus positional encodings. Multi-head self-attention, softmax(QKᵀ/√dₖ)V, lets each token weigh all the others, followed by feed-forward layers, residual connections and layer normalisation, stacked N times. The encoder (BERT) is for understanding; the decoder (GPT) is for generation.</details>
+<details><summary>BERT vs GPT?</summary>BERT is an encoder-only, bidirectional model trained by masked-token prediction, so it is good for classification, search and embeddings. GPT is a decoder-only, left-to-right model trained by next-token prediction, so it is good for generation.</details>
+<details><summary>RAG vs fine-tuning?</summary>RAG injects retrieved context at query time, which keeps knowledge fresh and citable at low cost. Fine-tuning changes the model weights to alter style or skills, at higher cost and with knowledge that goes stale. Choose RAG for knowledge and fine-tuning for behaviour.</details>
+<details><summary>How do you prevent overfitting in deep learning?</summary>More or augmented data, dropout, L2 weight decay, early stopping, batch normalisation, smaller models, and cross-validation.</details>
+<details><summary>AI model vs AI assistant vs AI agent?</summary>A model is the learned function. An assistant is a model plus a conversational interface that responds to you. An agent is a model plus tools, memory and a planning loop, so it pursues a goal over multiple steps.</details>
+<details><summary>What are LangChain or LangGraph agents, and when should you use them?</summary>They are frameworks for chaining LLM calls with tools, memory and retrieval. LangGraph models an agent as a state graph with loops and human checkpoints. Use them for multi-step, tool-using workflows; for a single prompt, call the API directly.</details>
+<h3>MLOps &amp; system design</h3>
+<details><summary>How would you serve an ML model at scale?</summary>Package the model and its preprocessing as a pipeline, version it in an MLflow registry, wrap it in a FastAPI app, containerise it with Docker, deploy it to Kubernetes or a managed endpoint (SageMaker, Azure ML), autoscale it, log predictions, and monitor latency and data drift. Run CI/CD with automated evaluation gates.</details>
+<details><summary>ETL vs ELT?</summary>ETL transforms data before loading it into the warehouse. ELT loads raw data first and transforms it inside the warehouse (Snowflake, BigQuery, Databricks), which is the modern cloud default.</details>
+<details><summary>p-value and hypothesis testing?</summary>A p-value is the probability of seeing results at least this extreme if the null hypothesis were true. If p is below α (usually 0.05), you reject the null. A/B tests use this approach.</details>
+<details><summary>ARIMA vs LSTM for time series?</summary>ARIMA is a statistical model that is interpretable, works well on small univariate data and assumes stationarity. An LSTM is a neural sequence model that captures non-linear, multivariate patterns but needs much more data. Gradient boosting with lag features is a strong practical baseline.</details>
+</div>
+</section>
+
+<!-- ============================ 24 ============================ -->
+<section id="s24">
+<h2><span class="num">24</span> Skills Roadmap &amp; Resources (from AI/ML job descriptions)</h2>
+<div class="body">
+<div class="grid-3">
+<div class="card"><h4>🧠 Core AI / GenAI</h4>Python · scikit-learn · PyTorch (priority) / TensorFlow · Hugging Face Transformers · prompt engineering · RAG · fine-tuning (LoRA) · LLM evaluation · LangChain / LangGraph / LlamaIndex · vLLM</div>
+<div class="card"><h4>🗄️ Data</h4>SQL / PostgreSQL + pgvector · vector DBs (FAISS, Milvus, Weaviate) · Spark · Parquet / Iceberg · S3 · ETL/ELT pipelines</div>
+<div class="card"><h4>⚙️ Backend</h4><b>FastAPI</b> · REST · async programming · multithreading · your existing C# / .NET microservice skills transfer directly</div>
+<div class="card"><h4>☁️ Cloud &amp; MLOps</h4>AWS (SageMaker, Lambda, S3, EKS) · Azure ML / Azure OpenAI · Docker · Kubernetes · MLflow · Terraform · CI/CD (Jenkins, GitHub Actions)</div>
+<div class="card"><h4>📐 Math &amp; Stats</h4>Probability · hypothesis testing · regression · linear algebra (vectors, matrices) · gradients · time-series forecasting</div>
+<div class="card"><h4>📊 Visualisation &amp; Front end</h4>matplotlib · seaborn · Plotly · Power BI (optional) · React for AI app front ends (good to have)</div>
+</div>
+<div class="callout cs"><b class="t">Your differentiator</b>A Salesforce + .NET background combined with AI is rare. Target <b>Agentforce / Einstein</b>, Data Cloud (which has a built-in vector DB), Azure OpenAI with .NET Semantic Kernel, and enterprise RAG over CRM data. Build 2–3 public GitHub projects that combine CRM data, ML or LLMs, and an API.</div>
+<h3>Practice &amp; reading</h3>
+<ul>
+<li><b>Coding practice</b>: LeetCode, HackerRank, Codewars, Exercism, CodeChef, Topcoder</li>
+<li><b>ML practice</b>: Kaggle competitions and notebooks</li>
+<li><b>Books</b>: <i>Artificial Intelligence: A Modern Approach</i> (Russell &amp; Norvig) · <i>Hands-On Machine Learning with Scikit-Learn, Keras &amp; TensorFlow</i> (Géron) · <i>Automate the Boring Stuff with Python</i> · <i>Windows Internals</i> (Russinovich), for OS, process and thread depth</li>
+<li><b>Papers</b>: <a href="https://arxiv.org/abs/1706.03762" target="_blank">Attention Is All You Need (2017)</a></li>
+<li><b>Docs</b>: <a href="https://scikit-learn.org/stable/user_guide.html" target="_blank">scikit-learn User Guide</a> · <a href="https://huggingface.co/learn" target="_blank">Hugging Face Learn</a> · <a href="https://modelcontextprotocol.io" target="_blank">modelcontextprotocol.io</a></li>
+</ul>
+</div>
+</section>
+
+<!-- ============================ 25 ============================ -->
+<section id="s25">
+<h2><span class="num">25</span> Project Ideas (portfolio-ready)</h2>
+<div class="body">
+<table>
+<tr><th>Project</th><th>Skills shown</th></tr>
+<tr><td><b>Salesforce → PostgreSQL exporter</b>: pulls records and attachments via REST or Bulk API, renames files, stores binaries and metadata</td><td>Python automation, APIs, OAuth, databases</td></tr>
+<tr><td><b>Semantic search / RAG over Salesforce knowledge articles</b>: a natural-language prompt returns relevant articles and cases with citations (LWC front end calling a FastAPI service)</td><td>Embeddings, vector DB, RAG, Salesforce integration</td></tr>
+<tr><td><b>MCP server for internal tools</b>: exposes Jira, XWiki and Salesforce queries to AI assistants</td><td>MCP, API design, agents</td></tr>
+<tr><td><b>Credit-card approval model with UI</b>: inputs income, profession and debt, and outputs approve or decline with an explanation (SHAP values)</td><td>Classification, explainability, Streamlit / FastAPI</td></tr>
+<tr><td><b>Titanic / diabetes end-to-end repo</b>: pipeline, model comparison table, saved model, CLI, tests</td><td>The full ML lifecycle</td></tr>
+<tr><td><b>Entrepreneur / leadership potential predictor</b> (survey-based traits and habits)</td><td>Feature design, ethics and bias awareness</td></tr>
+<tr><td><b>Web scraper + sentiment dashboard</b> (product reviews)</td><td>Scraping (respecting robots.txt), NLP, visualisation</td></tr>
+<tr><td><b>Slack / Teams ↔ Jira / GitHub bot</b>: posts PRs and defects, and creates tickets from chat</td><td>Webhooks, integration, LLM summarisation</td></tr>
+</table>
+<div class="callout warn"><b class="t">Responsible AI</b>Predictors based on personal traits (success, leadership, gender) carry bias and privacy risks. Document the data sources, test for fairness across groups, and never use them for real hiring decisions without governance.</div>
+</div>
+</section>
+
+<!-- ============================ 26 ============================ -->
+<section id="s26">
+<h2><span class="num">26</span> Corrections Applied to the Original Notes</h2>
+<div class="body">
+<table>
+<tr><th>Original note</th><th>Corrected</th></tr>
+<tr><td>The interpreter converts bytecode to binary</td><td>The PVM <i>interprets</i> bytecode; CPython has no JIT to machine code by default (an experimental JIT exists in 3.13+)</td></tr>
+<tr><td>"Python is an object-oriented language"</td><td>A multi-paradigm language in which everything is an object</td></tr>
+<tr><td>Every data type is heterogeneous</td><td>Containers (list, tuple, dict, set) can hold mixed types; NumPy arrays are homogeneous</td></tr>
+<tr><td>Sequence types include Set and Dictionary</td><td>Sequences are list, tuple, str and range. Set is a set type and dict is a mapping type.</td></tr>
+<tr><td>scikit-learn was created by Google</td><td>A Google Summer of Code project, now community and INRIA maintained</td></tr>
+<tr><td>A checksum is 36 hex characters</td><td>MD5 = 32, SHA-1 = 40, SHA-256 = 64 hex characters</td></tr>
+<tr><td>SD = √(Σ(x − x̄) / (n − 1))</td><td>The deviations must be <b>squared</b>: √(Σ(x − x̄)² / (n − 1))</td></tr>
+<tr><td>"Boasting", "Mc'Lodian distance"</td><td><b>Boosting</b>, <b>Manhattan distance</b></td></tr>
+<tr><td>Sigmoid outputs "0 or 1"; the "new sigmoid" ranges from −1 to 1</td><td>Sigmoid outputs a continuous value in (0, 1); the (−1, 1) function is <b>tanh</b></td></tr>
+<tr><td>CSV is semi-structured</td><td>CSV is structured (tabular). JSON and XML are semi-structured.</td></tr>
+<tr><td>Recursion is the only option for backtracking</td><td>Recursion is the natural choice, but an explicit stack works too</td></tr>
+<tr><td>pandas has a 3-D Panel</td><td>Removed in pandas 0.25; use MultiIndex or xarray</td></tr>
+<tr><td>TensorFlow supports Python 3.7–3.12</td><td>TF 2.21 supports 3.10–3.13, and 3.14 arrives with 2.22</td></tr>
+<tr><td>Backpropagation is "not out of the box" for FNN/CNN</td><td>Every framework performs backpropagation automatically (autograd) for all architectures</td></tr>
+<tr><td>Google Search uses a threaded binary search tree</td><td>Search engines use <b>inverted indexes</b>, ranking signals and, today, neural and vector retrieval</td></tr>
+<tr><td>DBSCAN is the only algorithm that removes outliers</td><td>Isolation Forest, LOF and One-Class SVM also detect outliers</td></tr>
+<tr><td>Joblib files are large because they contain imported method bodies</td><td>They are large because they serialise the learned arrays (trees, weights). Code is referenced by import path, not embedded.</td></tr>
+<tr><td>"LLM is developed using CPP"</td><td>LLMs are trained in Python frameworks (PyTorch, JAX) on C++ and CUDA kernels</td></tr>
+</table>
+<p style="font-size:.85rem;color:var(--muted)">Removed as personal or irrelevant: a laptop purchase note, a Kaggle login reminder, bare <code>.py</code> file references, a personal gist link, assignment numbers, and date stamps (the topic order is kept).</p>
+</div>
+</section>
+
+<!-- ============================ 27 ============================ -->
+<section id="s27">
+<h2><span class="num">27</span> Refined Prompt (reusable)</h2>
+<div class="body">
+<div class="inrow" style="margin-bottom:8px"><button class="btn primary" id="copyPrompt">📋 Copy prompt</button></div>
+<div class="prompt-box" id="promptText">ROLE
+You are a senior AI/ML educator and technical writer. Turn my raw classroom notes into a polished, accurate study guide.
+
+INPUT
+File: syllabus_python2.txt
+Raw, scattered running notes (~980 lines) from offline training in Pune covering: Python basics to advanced, OOP, concurrency, data structures, automation with Python, statistics, Machine Learning (supervised/unsupervised/ensembles), Deep Learning (FNN/CNN/RNN/Transformers), and GenAI (LLM, RAG, MCP), plus interview questions and job-market notes.
+
+AUDIENCE
+Software developer with 10+ years of experience in C#, .NET and Salesforce (Apex), learning AI to move into AI/ML roles. Skip beginner programming explanations; map Python and ML concepts to C#/.NET/Salesforce equivalents wherever helpful.
+
+CLEAN-UP RULES
+1. Remove passwords, credentials, account or login details, and personal notes (purchases, reminders).
+2. Ignore lines that only name a .py file. Drop dates, assignment numbers and other irrelevant details.
+3. Fix spelling and factual errors, and list every correction in a dedicated "Corrections" section.
+4. Do NOT copy formulas from the notes. Fetch and verify the standard formulas from authoritative sources (scikit-learn docs, Wikipedia, original papers) and render them with proper math notation.
+
+CONTENT RULES
+5. Reorganise into a logical learning path: Python → Automation → Statistics → ML → Deep Learning → GenAI → Career.
+6. Expand heading-only topics into concise technical explanations.
+7. Illustrate Python syntax with short, runnable, idiomatic code samples (type hints, logging, pathlib, no hard-coded secrets).
+8. For each topic, add a summary or "Important" callout, current best practices, and at least one real-world example (prefer enterprise and Salesforce scenarios).
+9. Include interview flashcards with model answers and a prioritised skills roadmap based on current AI/ML job descriptions.
+
+OUTPUT FORMAT
+10. A single self-contained, modern HTML5 file (no build step; CDN libraries allowed, with graceful offline fallback): sticky searchable sidebar table of contents, collapsible sections, dark/light theme, reading-progress bar, syntax-highlighted code with copy buttons, KaTeX math, CSS flow diagrams, comparison tables, and interactive widgets (e.g. confusion-matrix calculator, activation-function plotter, train/test split slider, filter-map-reduce demo).
+11. Crisp: favour tables, diagrams and callouts over long prose, while keeping every explanation in complete sentences.
+12. Save it next to the source file and append this refined prompt at the end.</div>
+</div>
+</section>
+
+<footer>Generated November 2026 from personal training notes. Formulas verified against the scikit-learn documentation, Wikipedia, Google ML Crash Course and "Attention Is All You Need". Library versions change, so check the official docs before production use.</footer>
+</main>
+</div>
+
+<script>
+/* ---------- Theme ---------- */
+const root = document.documentElement;
+root.dataset.theme = localStorage.getItem("notesTheme") || "dark";
+document.getElementById("themeBtn").onclick = () => {
+  root.dataset.theme = root.dataset.theme === "dark" ? "light" : "dark";
+  localStorage.setItem("notesTheme", root.dataset.theme);
+  drawAct();
+};
+
+/* ---------- Collapsible sections ---------- */
+const sections = [...document.querySelectorAll("main section")];
+sections.forEach(s => s.querySelector("h2").addEventListener("click", () => s.classList.toggle("collapsed")));
+document.getElementById("expandBtn").onclick = () => sections.forEach(s => s.classList.remove("collapsed"));
+document.getElementById("collapseBtn").onclick = () => sections.forEach(s => s.classList.add("collapsed"));
+
+/* ---------- Search filter ---------- */
+const navLinks = [...document.querySelectorAll("#toc li a")];
+document.getElementById("search").addEventListener("input", e => {
+  const q = e.target.value.trim().toLowerCase();
+  sections.forEach(s => {
+    const hit = !q || s.textContent.toLowerCase().includes(q);
+    s.classList.toggle("hidden", !hit);
+    if (q && hit) s.classList.remove("collapsed");
+    const link = navLinks.find(a => a.getAttribute("href") === "#" + s.id);
+    if (link) link.parentElement.classList.toggle("hidden", !hit);
+  });
+});
+
+/* ---------- Progress bar + active link ---------- */
+window.addEventListener("scroll", () => {
+  const h = document.documentElement;
+  document.getElementById("progress").style.width = (h.scrollTop / (h.scrollHeight - h.clientHeight) * 100) + "%";
+  let current = sections[0].id;
+  sections.forEach(s => { if (s.getBoundingClientRect().top < 120) current = s.id; });
+  navLinks.forEach(a => a.classList.toggle("active", a.getAttribute("href") === "#" + current));
+});
+
+/* ---------- Copy buttons ---------- */
+document.querySelectorAll("pre").forEach(pre => {
+  const b = document.createElement("button");
+  b.className = "btn copy"; b.textContent = "Copy";
+  b.onclick = () => { navigator.clipboard.writeText(pre.querySelector("code").innerText); b.textContent = "Copied ✓"; setTimeout(() => b.textContent = "Copy", 1200); };
+  pre.appendChild(b);
+});
+document.getElementById("copyPrompt").onclick = e => {
+  navigator.clipboard.writeText(document.getElementById("promptText").innerText);
+  e.target.textContent = "Copied ✓"; setTimeout(() => e.target.textContent = "📋 Copy prompt", 1200);
+};
+
+/* ---------- FMR demo ---------- */
+const fmrData = [1,2,3,4,5,6,7,8,9,10];
+let fmrStage = 0;
+function renderFMR() {
+  const box = document.getElementById("fmrChips"), msg = document.getElementById("fmrMsg");
+  const btn = document.getElementById("fmrStep");
+  btn.disabled = false;
+  if (fmrStage === 0) { box.innerHTML = fmrData.map(n => `<span class="chip">${n}</span>`).join(""); msg.textContent = "Raw data: 10 items"; }
+  if (fmrStage === 1) { box.innerHTML = fmrData.map(n => `<span class="chip ${n%2? 'out':'hot'}">${n}</span>`).join(""); msg.textContent = "filter(n % 2 == 0): 5 items survive"; }
+  if (fmrStage === 2) { box.innerHTML = fmrData.filter(n=>n%2===0).map(n => `<span class="chip hot">${n}² = ${n*n}</span>`).join(""); msg.textContent = "map(n * n): same count, values transformed"; }
+  if (fmrStage === 3) { const t = fmrData.filter(n=>n%2===0).reduce((a,n)=>a+n*n,0); box.innerHTML = `<span class="chip hot" style="font-size:1.1rem">4 + 16 + 36 + 64 + 100 = ${t}</span>`; msg.textContent = "reduce(acc + n): many → one"; btn.disabled = true; }
+}
+document.getElementById("fmrStep").onclick = () => { fmrStage = Math.min(3, fmrStage + 1); renderFMR(); };
+document.getElementById("fmrReset").onclick = () => { fmrStage = 0; renderFMR(); };
+renderFMR();
+
+/* ---------- Train/test split ---------- */
+function renderSplit() {
+  const p = +document.getElementById("splitR").value, n = 150, tr = Math.round(n * p / 100);
+  document.getElementById("splitV").textContent = p + "%";
+  const a = document.getElementById("trainBar"), b = document.getElementById("testBar");
+  a.style.width = p + "%"; a.textContent = `Train: ${tr} rows`;
+  b.style.width = (100 - p) + "%"; b.textContent = `Test: ${n - tr}`;
+}
+document.getElementById("splitR").oninput = renderSplit; renderSplit();
+
+/* ---------- Confusion matrix calculator ---------- */
+const cmIds = ["cmTP","cmFN","cmFP","cmTN"];
+function renderCM() {
+  const [tp, fn, fp, tn] = cmIds.map(id => Math.max(0, +document.getElementById(id).value || 0));
+  const total = tp + fn + fp + tn, safe = (a, b) => b ? a / b : 0;
+  const acc = safe(tp + tn, total), prec = safe(tp, tp + fp), rec = safe(tp, tp + fn), spec = safe(tn, tn + fp);
+  const f1 = safe(2 * tp, 2 * tp + fp + fn);
+  document.getElementById("cmGrid").innerHTML = `
+    <div></div><div><b>Pred −</b></div><div><b>Pred +</b></div>
+    <div><b>Actual −</b></div><div class="tn">TN ${tn}</div><div class="fp">FP ${fp}</div>
+    <div><b>Actual +</b></div><div class="fn">FN ${fn}</div><div class="tp">TP ${tp}</div>`;
+  document.getElementById("cmMetrics").innerHTML = [["Accuracy",acc],["Precision",prec],["Recall",rec],["Specificity",spec],["F1 score",f1]]
+    .map(([k,v]) => `<div class="metric"><span>${k}</span><div class="bar"><i style="width:${v*100}%"></i></div><span>${(v*100).toFixed(1)}%</span></div>`).join("");
+  let tip = "";
+  if (acc > 0.95 && rec < 0.2) tip = "⚠️ High accuracy but near-zero recall: the classic imbalanced-data trap. The model misses almost every positive case.";
+  else if (rec > prec + 0.15) tip = "The model favours recall: few cases are missed, but there are more false alarms. That suits medical screening and fraud.";
+  else if (prec > rec + 0.15) tip = "The model favours precision: flagged cases are trustworthy, but some are missed. That suits spam filtering.";
+  else tip = "Precision and recall are balanced.";
+  document.getElementById("cmInsight").textContent = tip;
+}
+cmIds.forEach(id => document.getElementById(id).addEventListener("input", renderCM));
+document.querySelectorAll("[data-preset]").forEach(b => b.onclick = () => {
+  b.dataset.preset.split(",").forEach((v, i) => document.getElementById(cmIds[i]).value = v); renderCM();
+});
+renderCM();
+
+/* ---------- Activation function plotter ---------- */
+const actFns = {
+  sigmoid: { f: z => 1 / (1 + Math.exp(-z)), c: "#58a6ff" },
+  tanh:    { f: z => Math.tanh(z),           c: "#3fb950" },
+  relu:    { f: z => Math.max(0, z),         c: "#f0883e" },
+  leaky:   { f: z => z > 0 ? z : 0.1 * z,    c: "#bc8cff" },
+};
+const cv = document.getElementById("actCanvas"), ctx = cv.getContext("2d");
+const X0 = -6, X1 = 6, Y0 = -1.5, Y1 = 3;
+const px = x => (x - X0) / (X1 - X0) * cv.width, py = y => cv.height - (y - Y0) / (Y1 - Y0) * cv.height;
+function activeFns() { return [...document.querySelectorAll("#actToggles input:checked")].map(i => i.value); }
+function drawAct() {
+  const grid = getComputedStyle(root).getPropertyValue("--border"), txt = getComputedStyle(root).getPropertyValue("--muted");
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.strokeStyle = grid; ctx.lineWidth = 1; ctx.fillStyle = txt; ctx.font = "11px Segoe UI";
+  for (let x = X0; x <= X1; x++) { ctx.beginPath(); ctx.moveTo(px(x), 0); ctx.lineTo(px(x), cv.height); ctx.stroke(); if (x) ctx.fillText(x, px(x) + 2, py(0) - 3); }
+  for (let y = -1; y <= 3; y++) { ctx.beginPath(); ctx.moveTo(0, py(y)); ctx.lineTo(cv.width, py(y)); ctx.stroke(); ctx.fillText(y, px(0) + 3, py(y) - 3); }
+  ctx.strokeStyle = txt; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(0, py(0)); ctx.lineTo(cv.width, py(0)); ctx.moveTo(px(0), 0); ctx.lineTo(px(0), cv.height); ctx.stroke();
+  activeFns().forEach(k => {
+    ctx.strokeStyle = actFns[k].c; ctx.lineWidth = 2.5; ctx.beginPath();
+    for (let i = 0; i <= cv.width; i++) { const x = X0 + i / cv.width * (X1 - X0), y = actFns[k].f(x); i ? ctx.lineTo(i, py(y)) : ctx.moveTo(i, py(y)); }
+    ctx.stroke();
+  });
+}
+document.querySelectorAll("#actToggles input").forEach(i => i.onchange = drawAct);
+cv.addEventListener("mousemove", e => {
+  const r = cv.getBoundingClientRect(), z = X0 + (e.clientX - r.left) / r.width * (X1 - X0);
+  document.getElementById("actReadout").textContent = `z = ${z.toFixed(2)}  →  ` + activeFns().map(k => `${k}: ${actFns[k].f(z).toFixed(3)}`).join("  |  ");
+});
+drawAct();
+
+/* ---------- Libraries (load-safe) ---------- */
+window.addEventListener("load", () => {
+  if (window.hljs) document.querySelectorAll("pre code").forEach(el => hljs.highlightElement(el));
+  if (window.renderMathInElement) renderMathInElement(document.body, {
+    delimiters: [{left: "\\[", right: "\\]", display: true}, {left: "\\(", right: "\\)", display: false}],
+    ignoredTags: ["script", "noscript", "style", "textarea", "pre", "code"], throwOnError: false
+  });
+});
+</script>
+</body>
+</html>
